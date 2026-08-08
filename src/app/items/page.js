@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { fetchFullCatalog } from "@/lib/data-fetcher-server";
 import ProductsClient from "./ProductsClient";
 
@@ -8,10 +9,12 @@ export default async function ProductsPage({ district = null, city = null }) {
   const allProducts = await fetchFullCatalog();
 
   return (
-    <ProductsClient
-      initialProducts={allProducts}
-      district={district}
-      city={city}
-    />
+    <Suspense fallback={<div className="py-20 text-center text-slate-500">Loading products...</div>}>
+      <ProductsClient
+        initialProducts={allProducts}
+        district={district}
+        city={city}
+      />
+    </Suspense>
   );
 }

@@ -216,15 +216,15 @@ export default function HeroSection({ city }) {
 
           <div className="relative">
 
-            {/* Main Circle */}
-            <div className="h-[520px] w-[520px] rounded-full bg-gradient-to-br from-red-100 via-orange-50 to-white shadow-2xl flex items-center justify-center">
-
-              <img
-                src="https://dummyimage.com/500x500/f8f8f8/333.png&text=Biomedical+Equipment"
-                alt="Biomedical Equipment"
-                className="w-[420px] object-contain drop-shadow-2xl"
-              />
-
+            {/* Main Rounded Frame with Brand New Photorealistic Image */}
+            <div className="h-[480px] w-[500px] rounded-[36px] overflow-hidden bg-white shadow-2xl border border-slate-100 relative flex items-center justify-center p-3">
+              <div className="relative w-full h-full rounded-[28px] overflow-hidden bg-slate-50">
+                <img
+                  src="/images/hero-biomedical.png"
+                  alt="Rajbiosis Private Limited Biomedical Equipment"
+                  className="w-full h-full object-cover rounded-[28px] hover:scale-105 transition-transform duration-700"
+                />
+              </div>
             </div>
 
             {/* Floating Card 1 */}

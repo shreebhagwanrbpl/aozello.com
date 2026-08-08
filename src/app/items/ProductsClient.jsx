@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback, memo, Profiler } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ShieldCheck,
@@ -147,6 +148,9 @@ const CategoryItem = memo(function CategoryItem({
 });
 
 export default function ProductsClient({ initialProducts = [], district = null, city = null }) {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams?.get("category");
+
   const [categorySearch, setCategorySearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [productSearch, setProductSearch] = useState("");
@@ -155,6 +159,14 @@ export default function ProductsClient({ initialProducts = [], district = null, 
   const [openedSubCategories, setOpenedSubCategories] = useState({});
   const [pendingScroll, setPendingScroll] = useState(null);
   const [showTopButton, setShowTopButton] = useState(false);
+
+  // Set initial category from URL
+  useEffect(() => {
+    if (categoryParam) {
+      setOpenedCategory(categoryParam);
+      setActiveCategory(categoryParam);
+    }
+  }, [categoryParam]);
 
   // Debounce search term updates to make search typing instant
   useEffect(() => {
@@ -355,47 +367,7 @@ export default function ProductsClient({ initialProducts = [], district = null, 
 
       {/* HERO */}
 
-      <section className="relative pt-32 pb-24 overflow-hidden">
 
-        <div className="absolute top-0 left-0 w-96 h-96 bg-violet-100 blur-3xl rounded-full"></div>
-
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-100 blur-3xl rounded-full"></div>
-
-        <div className="max-w-7xl mx-auto px-5 relative z-10">
-
-          <div className="text-center max-w-5xl mx-auto">
-
-            <span className="inline-flex items-center rounded-full bg-violet-100 px-5 py-2 text-sm font-semibold text-violet-700">
-
-              Raj Biosis
-
-            </span>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 35 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: .7 }}
-              className="mt-8 text-5xl lg:text-7xl font-bold leading-tight"
-            >
-
-              {city
-                ? `Buy Medical Laboratory Equipment in ${city}`
-                : "Medical Laboratory Equipment"}
-
-            </motion.h1>
-
-            <p className="mt-8 text-xl text-slate-600 leading-9">
-
-              Premium laboratory instruments,
-              diagnostic systems and hospital equipment.
-
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
       {/* Products */}
       <section className="section-padding bg-white">
         <div className="container-custom">

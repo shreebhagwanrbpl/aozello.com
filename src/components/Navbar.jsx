@@ -50,13 +50,17 @@ export default function Navbar() {
       <div className="container-custom h-20 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href={makeLink("/")}>
-          <h1 className="text-xl md:text-2xl font-bold text-orange-700">
-            Raj
-            <span className="text-slate-900">
-              {" "}Biosis
+        <Link href={makeLink("/")} className="flex items-center gap-3 group">
+          <img
+            src="/logo.png"
+            alt="Rajbiosis Private Limited"
+            className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="flex flex-col">
+            <span className="text-base md:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+              Rajbiosis <span className="text-red-600">Private Limited</span>
             </span>
-          </h1>
+          </div>
         </Link>
 
         {/* Desktop Menu */}
