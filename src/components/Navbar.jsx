@@ -52,9 +52,9 @@ export default function Navbar() {
         {/* Logo */}
         <Link href={makeLink("/")}>
           <h1 className="text-xl md:text-2xl font-bold text-orange-700">
-            Central
+            Raj
             <span className="text-slate-900">
-              {" "}Biomedicals
+              {" "}Biosis
             </span>
           </h1>
         </Link>
