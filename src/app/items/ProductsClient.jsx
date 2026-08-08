@@ -330,10 +330,10 @@ export default function ProductsClient({ initialProducts = [], district = null, 
   return (
     <Profiler id="ProductsLayout" onRender={onRenderCallback}>
       {/* Banner */}
-      <PageBanner
+      {/* <PageBanner
         title={city ? `Our Products in ${city}` : "Our Products"}
         subtitle="Explore advanced biomedical and diagnostic equipment designed for modern healthcare excellence."
-      />
+      /> */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
