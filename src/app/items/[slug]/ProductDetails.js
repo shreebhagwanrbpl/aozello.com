@@ -1,5 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import {
+    generateProductSchema,
+    generateFaqSchema,
+    generateBreadcrumbSchema,
+    makeSlug
+} from "@/lib/seo-utils";
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { usePathname } from "next/navigation";
@@ -159,47 +166,34 @@ export default function ProductDetails({ slug, product: initialProduct }) {
         }
     };
 
-    const productSchema = product
-        ? {
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: product.title,
-            image: product.image ? [product.image] : [],
-            description:
-                product.desc ||
-                product.description ||
-                product.title,
-            brand: {
-                "@type": "Brand",
-                name: product.brand || "Raj Biosiss",
-            },
-        }
-        : null;
+    const productSchema = product ? generateProductSchema(product, cityName !== "India" ? cityName : "") : null;
 
-    const faqSchema = product
-        ? {
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: [
-                {
-                    "@type": "Question",
-                    name: `What is ${product.title} used for?`,
-                    acceptedAnswer: {
-                        "@type": "Answer",
-                        text: `${product.title} is used in hospitals, pathology labs and diagnostic centres.`,
-                    },
-                },
-                {
-                    "@type": "Question",
-                    name: "Do you provide installation support?",
-                    acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Yes, installation and technical support are available.",
-                    },
-                },
-            ],
+    const faqs = product ? [
+        {
+            question: `What is ${product.title} used for?`,
+            answer: `${product.title} is designed for medical laboratories, hospitals, pathology labs, and diagnostic centers for precise clinical diagnostic testing.`
+        },
+        {
+            question: `Do you provide installation and service support for ${product.title}?`,
+            answer: `Yes, Rajbiosis Private Limited provides on-site installation, staff technical training, operational guidance, and Annual Maintenance Support (AMC/CMC) across India.`
+        },
+        {
+            question: `How can I request a quotation or price details for ${product.title}?`,
+            answer: `You can request an instant quotation by filling out the enquiry form on this page or calling our technical helpline directly at +91 9983123469.`
         }
-        : null;
+    ] : [];
+
+    const faqSchema = generateFaqSchema(faqs);
+
+    const categorySlug = product?.category ? makeSlug(product.category) : "diagnostic-equipment";
+    const brandSlug = product?.brand ? makeSlug(product.brand) : "";
+
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: "Home", url: "/" },
+        { name: "Products", url: "/items" },
+        ...(product?.category ? [{ name: product.category, url: `/category/${categorySlug}` }] : []),
+        { name: product?.title || "Product Details", url: `/items/${slug}` }
+    ]);
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(window.location.href);
@@ -297,25 +291,51 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                 </p>
             </div>
 
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(productSchema),
-                }}
-            />
+            {productSchema && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(productSchema),
+                    }}
+                />
+            )}
 
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(faqSchema),
-                }}
-            />
+            {faqSchema && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(faqSchema),
+                    }}
+                />
+            )}
+
+            {breadcrumbSchema && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(breadcrumbSchema),
+                    }}
+                />
+            )}
+
             <div className="container-custom relative z-10 space-y-10">
                 
                 {/* Breadcrumbs */}
-                <div className="text-sm text-slate-500 font-medium">
-                    Home / Products / <span className="text-slate-800">{product.title}</span>
-                </div>
+                <nav className="text-sm text-slate-500 font-medium flex items-center gap-2 flex-wrap" aria-label="Breadcrumb">
+                    <Link href="/" className="hover:text-red-600 transition">Home</Link>
+                    <span>/</span>
+                    <Link href="/items" className="hover:text-red-600 transition">Products</Link>
+                    {product.category && (
+                        <>
+                            <span>/</span>
+                            <Link href={`/category/${categorySlug}`} className="hover:text-red-600 transition">
+                                {product.category}
+                            </Link>
+                        </>
+                    )}
+                    <span>/</span>
+                    <span className="text-slate-900 font-bold">{product.title}</span>
+                </nav>
 
                 {/* Main Balanced 2-Column Hero Grid */}
                 <div className="grid lg:grid-cols-[480px_1fr] xl:grid-cols-[540px_1fr] gap-8 xl:gap-12 items-start">

@@ -195,15 +195,18 @@ export default function Footer() {
             </h3>
 
             <div className="flex flex-col gap-3 text-sm text-slate-600">
-              {footerCategories.map((cat) => (
-                <Link
-                  key={cat}
-                  href={makeLink(`/items?category=${encodeURIComponent(cat)}`)}
-                  className="hover:text-red-600 transition"
-                >
-                  {cat}
-                </Link>
-              ))}
+              {footerCategories.map((cat) => {
+                const catSlug = cat.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+                return (
+                  <Link
+                    key={cat}
+                    href={`/category/${catSlug}`}
+                    className="hover:text-red-600 transition"
+                  >
+                    {cat}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

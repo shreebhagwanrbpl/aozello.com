@@ -1,24 +1,28 @@
-export async function generateMetadata({ params }) {
+import { generateCanonicalUrl } from "@/lib/seo-utils";
 
+export async function generateMetadata({ params }) {
   const { district = "jaipur" } = await params;
 
   const districtName = district
     .replace(/-/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
-  const url = `https://aozello.com/${district}`;
+  const canonicalUrl = generateCanonicalUrl(`/${district}`);
 
   return {
-    title: `Biomedical & Diagnostic Equipment Supplier in ${districtName} | Raj Biosis`,
+    title: `Biomedical & Diagnostic Equipment Supplier in ${districtName} | Rajbiosis`,
 
-    description: `Raj Biosis supplies diagnostic machines, laboratory equipment, reagents and biomedical products in ${districtName}.`,
+    description: `Rajbiosis Private Limited is the trusted supplier and distributor of clinical analyzers, laboratory instruments, pathology equipment, and reagents in ${districtName}.`,
 
     keywords: [
-      `Biomedical Equipment ${districtName}`,
+      `Biomedical Equipment Supplier in ${districtName}`,
       `Diagnostic Machines ${districtName}`,
-      `Laboratory Equipment ${districtName}`,
+      `Laboratory Equipment Supplier ${districtName}`,
       `Pathology Equipment ${districtName}`,
       `Biomedical Supplier ${districtName}`,
+      `CBC Machine Price ${districtName}`,
+      `Hematology Analyzer ${districtName}`,
+      "Rajbiosis Private Limited"
     ],
 
     robots: {
@@ -27,15 +31,22 @@ export async function generateMetadata({ params }) {
     },
 
     alternates: {
-      canonical: url,
+      canonical: canonicalUrl,
     },
 
     openGraph: {
-      title: `Biomedical Equipment in ${districtName}`,
-      description: `Diagnostic laboratory equipment supplier in ${districtName}.`,
-      url,
+      title: `Biomedical & Diagnostic Equipment Supplier in ${districtName} | Rajbiosis`,
+      description: `Leading diagnostic laboratory equipment and reagent supplier in ${districtName}.`,
+      url: canonicalUrl,
+      siteName: "Rajbiosis Private Limited",
       type: "website",
     },
+
+    twitter: {
+      card: "summary_large_image",
+      title: `Biomedical Equipment in ${districtName} | Rajbiosis`,
+      description: `Diagnostic equipment supplier in ${districtName}.`,
+    }
   };
 }
 

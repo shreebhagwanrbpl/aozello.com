@@ -13,7 +13,7 @@ import {
   Microscope,
 } from "lucide-react";
 
-export default function HeroSection({ city }) {
+export default function  HeroSection({ city }) {
   const [loading, setLoading] = useState(true);
 
   const [heroData, setHeroData] = useState({
