@@ -7,21 +7,21 @@ export default function Testimonials() {
   const reviews = [
     {
       name: "Dr. Rajesh Kumar",
-      role: "Healthcare Specialist",
+      role: "Senior Consultant Pathologist",
       review:
-        "Raj Biosis has consistently delivered reliable diagnostic equipment with outstanding support.",
+        "Rajbiosis Private Limited has been our trusted partner for automated biochemistry analyzers and electrolyte reagents. Their prompt technical response and original OEM quality give us total confidence.",
     },
     {
       name: "Amit Sharma",
-      role: "Lab Director",
+      role: "Diagnostic Lab Director",
       review:
-        "Professional service, premium products, and excellent biomedical consultation experience.",
+        "Outstanding AMC support and super fast delivery of hematology reagents. Their engineers solved our analyzer breakdown on the very same day. Highly recommended across Rajasthan and beyond!",
     },
     {
-      name: "Neha Verma",
-      role: "Research Head",
+      name: "Dr. Neha Verma",
+      role: "Head of Hospital Diagnostics",
       review:
-        "Their healthcare solutions improved our laboratory efficiency significantly.",
+        "Setting up our clinical pathology lab with Rajbiosis was smooth and hassle-free. From instrument installation to staff operational training, their team delivered 100% professionalism.",
     },
   ];
 
@@ -35,9 +35,9 @@ export default function Testimonials() {
       <div className="container-custom relative z-10">
 
         <SectionTitle
-          badge="Testimonials"
-          title="What Our Clients Say"
-          description="Trusted by healthcare professionals, laboratories, and biomedical institutions."
+          badge="Client Testimonials"
+          title="Trusted by Healthcare Leaders Across India"
+          description="Hear what pathologists, lab directors, and hospital administrators say about Rajbiosis Private Limited."
           center
         />
 

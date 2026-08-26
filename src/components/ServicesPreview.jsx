@@ -15,27 +15,27 @@ export default function ServicesPreview() {
   const services = [
     {
       icon: <Microscope size={30} />,
-      title: "Diagnostic Equipment",
+      title: "Diagnostic Equipment Supply",
       description:
-        "Advanced diagnostic systems designed for accurate and efficient healthcare testing.",
+        "Fully automated hematology counters, biochemistry analyzers, and electrolyte testing instruments engineered for clinical precision.",
     },
     {
       icon: <FlaskConical size={30} />,
-      title: "Laboratory Solutions",
+      title: "OEM Reagents & Supplies",
       description:
-        "Reliable laboratory instruments and biomedical support for modern medical environments.",
+        "High-grade biochemistry reagents, diluents, calibrators, and rapid diagnostic test kits with fast pan-India express dispatch.",
     },
     {
       icon: <ShieldCheck size={30} />,
-      title: "Maintenance Support",
+      title: "AMC / CMC Maintenance",
       description:
-        "Professional technical support and maintenance for biomedical systems.",
+        "Flexible Annual & Comprehensive Maintenance Contracts to eliminate laboratory downtime and extend instrument lifespan.",
     },
     {
       icon: <Stethoscope size={30} />,
-      title: "Healthcare Consultation",
+      title: "Turnkey Lab Consultancy",
       description:
-        "Expert guidance and consultation for healthcare and biomedical operations.",
+        "End-to-end consulting, spatial layout planning, equipment procurement, and technician operational training for new labs.",
     },
   ];
 
@@ -55,8 +55,8 @@ export default function ServicesPreview() {
         {/* Title */}
         <SectionTitle
           badge="Our Services"
-          title="Premium Diagnostic & Biomedical Services"
-          description="Providing advanced healthcare technologies, laboratory systems, and trusted biomedical solutions for modern diagnostics."
+          title="Comprehensive Biomedical & Diagnostic Solutions"
+          description="Delivering cutting-edge clinical analyzers, original testing reagents, and round-the-clock technical service for medical institutions across India."
           center
         />
 

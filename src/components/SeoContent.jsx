@@ -6,47 +6,32 @@ export default function SeoContent({ city = "" }) {
             <div className="container-custom">
 
                 <h2 className="text-4xl font-bold text-slate-900 mb-8">
-                    Biomedical Equipment Supplier in {location}
+                    Biomedical & Clinical Diagnostic Equipment Supplier in {location}
                 </h2>
 
                 <div className="space-y-6 text-slate-600 leading-8 text-lg">
 
                     <p>
-                        Raj Biosis is a trusted supplier of biomedical
-                        and laboratory equipment in {location}. We provide
-                        CBC Machines, Hematology Analyzers, Biochemistry
-                        Analyzers, Urine Analyzers, ELISA Readers and
-                        diagnostic instruments for hospitals, pathology labs
-                        and healthcare facilities.
+                        <strong className="text-slate-900">Rajbiosis Private Limited</strong> is a leading supplier, distributor, and service provider of advanced biomedical equipment and diagnostic analyzers in {location}. We specialize in fully automated Hematology Analyzers (3-Part & 5-Part CBC machines), Biochemistry Analyzers, Electrolyte Analyzers, Urine Analyzers, ELISA Readers, and rapid diagnostic test kits for hospitals, pathology labs, and clinical diagnostic centers.
                     </p>
 
                     <p>
-                        Our mission is to provide reliable and high-quality
-                        laboratory equipment to healthcare professionals across
-                        India. We work with diagnostic centres, hospitals,
-                        research laboratories and medical institutions to
-                        deliver advanced biomedical solutions.
+                        Our mission is to deliver dependable, high-precision laboratory instruments and original OEM reagents to healthcare professionals across India. Partnering with global leaders such as Mindray, Erba, Roche, Sysmex, Meril, Agappe, and Transasia, we ensure superior diagnostic accuracy and seamless laboratory workflows.
                     </p>
 
                     <p>
-                        We offer installation assistance, product guidance and
-                        technical support for a wide range of laboratory
-                        instruments. Whether you are setting up a new
-                        diagnostic laboratory or upgrading existing equipment,
-                        our team can help you select the right solution.
+                        We offer comprehensive technical support including on-site equipment installation, precision calibration, Annual Maintenance Contracts (AMC), Comprehensive Maintenance Contracts (CMC), breakdown repair, and technician operational training.
                     </p>
 
                     <p>
-                        Raj Biosis supplies equipment across multiple
-                        districts and cities, helping healthcare providers
-                        improve testing efficiency and diagnostic accuracy.
+                        Whether setting up a new diagnostic lab or upgrading your existing clinical instruments, Rajbiosis Private Limited provides tailored, cost-effective solutions backed by pan-India express logistics.
                     </p>
 
                 </div>
 
                 {/* FAQ Section */}
 
-                <div className="mt-16">
+                <div className="mt-16 border-t border-slate-100 pt-12">
 
                     <h2 className="text-3xl font-bold text-slate-900 mb-8">
                         Frequently Asked Questions
@@ -55,49 +40,42 @@ export default function SeoContent({ city = "" }) {
                     <div className="space-y-6">
 
                         <div>
-                            <h3 className="font-semibold text-xl">
-                                Do you supply biomedical equipment across India?
+                            <h3 className="font-semibold text-xl text-slate-900">
+                                Do you supply diagnostic analyzers and reagents across India?
                             </h3>
 
                             <p className="text-slate-600 mt-2">
-                                Yes, we supply biomedical and laboratory
-                                equipment across multiple districts and cities.
+                                Yes, Rajbiosis Private Limited supplies biomedical instruments, OEM reagents, and diagnostic consumables across all states and districts in India with fast express delivery.
                             </p>
                         </div>
 
                         <div>
-                            <h3 className="font-semibold text-xl">
-                                Which laboratory instruments do you provide?
+                            <h3 className="font-semibold text-xl text-slate-900">
+                                Which clinical laboratory instruments do you supply?
                             </h3>
 
                             <p className="text-slate-600 mt-2">
-                                We provide CBC Machines, Hematology Analyzers,
-                                Biochemistry Analyzers, ELISA Readers, Urine
-                                Analyzers and other diagnostic equipment.
+                                We supply CBC Hematology Analyzers, Semi & Fully Automated Biochemistry Analyzers, Electrolyte Analyzers, Urine Chemistry Analyzers, Rapid Diagnostic Kits, and ELISA Readers.
                             </p>
                         </div>
 
                         <div>
-                            <h3 className="font-semibold text-xl">
-                                Do you provide installation support?
+                            <h3 className="font-semibold text-xl text-slate-900">
+                                Do you provide AMC / CMC maintenance and breakdown support?
                             </h3>
 
                             <p className="text-slate-600 mt-2">
-                                Yes, installation assistance and technical
-                                support are available depending on location and
-                                equipment type.
+                                Yes, we provide Annual Maintenance Contracts (AMC), Comprehensive Maintenance Contracts (CMC), rapid engineer dispatch, emergency breakdown repairs, and genuine replacement spare parts.
                             </p>
                         </div>
 
                         <div>
-                            <h3 className="font-semibold text-xl">
-                                Who can purchase biomedical equipment?
+                            <h3 className="font-semibold text-xl text-slate-900">
+                                Can you assist in setting up a new pathology laboratory?
                             </h3>
 
                             <p className="text-slate-600 mt-2">
-                                Hospitals, pathology labs, diagnostic centres,
-                                research laboratories and healthcare facilities
-                                can purchase equipment from us.
+                                Absolutely. We offer end-to-end turnkey lab setup consulting, space layout planning, equipment selection, installation, calibration, and operational training for your lab technicians.
                             </p>
                         </div>
 

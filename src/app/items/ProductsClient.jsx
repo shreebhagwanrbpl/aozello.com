@@ -167,7 +167,6 @@ export default function ProductsClient({ initialProducts = [], district = null, 
       setActiveCategory(categoryParam);
     }
   }, [categoryParam]);
-
   // Debounce search term updates to make search typing instant
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -13,22 +13,22 @@ export default function StatsSection() {
     {
       icon: <Building2 size={34} />,
       number: "10+",
-      label: "Years Experience",
+      label: "Years Healthcare Excellence",
     },
     {
       icon: <FlaskConical size={34} />,
       number: "500+",
-      label: "Biomedical Products",
+      label: "Diagnostic Products & Reagents",
     },
     {
       icon: <Users size={34} />,
       number: "200+",
-      label: "Trusted Clients",
+      label: "Pathology Labs & Hospitals",
     },
     {
       icon: <BadgeCheck size={34} />,
       number: "100%",
-      label: "Quality Assurance",
+      label: "OEM Quality Guarantee",
     },
   ];
 

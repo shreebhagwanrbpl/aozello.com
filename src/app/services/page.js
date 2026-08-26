@@ -22,28 +22,28 @@ import { db } from "@/lib/firebase";
 
 const defaultServices = [
   {
-    title: "Laboratory Equipment Solutions",
-    desc: "Advanced laboratory instruments, analyzer systems, diagnostic equipment, and healthcare testing solutions tailored for clinical laboratories, hospitals, and research institutions.",
+    title: "Clinical Diagnostic Equipment Supply",
+    desc: "Supply of advanced automated hematology 3-part & 5-part cell counters, clinical chemistry biochemistry analyzers, electrolyte analyzers, urine chemistry instruments, and ELISA readers for labs and hospitals.",
   },
   {
-    title: "Biomedical Maintenance & AMC / CMC Support",
-    desc: "Comprehensive Annual Maintenance Contracts (AMC), Comprehensive Maintenance Contracts (CMC), breakdown repair, and routine preventive servicing for diagnostic analyzers.",
+    title: "Annual & Comprehensive Maintenance (AMC / CMC)",
+    desc: "Customized Annual Maintenance Contracts (AMC) and Comprehensive Maintenance Contracts (CMC) including preventive maintenance visits, emergency breakdown repairs, and routine instrument recalibrations.",
   },
   {
-    title: "Equipment Installation & Calibration",
-    desc: "Precision installation, technical setup, calibration, validation, and operational staff training for hospitals, pathology labs, and diagnostic centers across India.",
+    title: "Equipment Installation, Calibration & Training",
+    desc: "Precision installation, technical site validation, quality control benchmarking, and operational training for laboratory technicians and pathologists across India.",
   },
   {
-    title: "Biochemistry & Electrolyte Reagents Supply",
-    desc: "High quality supply of genuine biochemistry reagents, hematology diluents, electrolyte packs, and rapid diagnostic test kits with fast express delivery.",
+    title: "OEM Reagents, Diluents & Rapid Test Kits",
+    desc: "Always-in-stock supply of original biochemistry reagents, hematology diluents, electrolyte packs, calibrators, controls, and rapid diagnostic screening kits with pan-India express logistics.",
   },
   {
-    title: "Turnkey Pathology Lab Setup Consultancy",
-    desc: "End-to-end consulting, lab workflow design, space optimization, equipment selection, and procurement guidance for new diagnostic setups and pathology labs.",
+    title: "Turnkey Pathology Laboratory Consultancy",
+    desc: "End-to-end consulting for new diagnostic setups, lab space layout design, instrument workflow optimization, NABL alignment guidance, and cost-effective equipment procurement.",
   },
   {
-    title: "24/7 Technical Support & Breakdown Assistance",
-    desc: "Dedicated technical helpline, rapid engineer dispatch, emergency breakdown resolution, and genuine OEM spare parts supply to ensure zero laboratory downtime.",
+    title: "24/7 Technical Helpline & Emergency Breakdown Response",
+    desc: "Dedicated technical phone support, quick engineer on-site dispatch, rapid troubleshooting, and replacement of genuine OEM spare parts to guarantee zero operational downtime.",
   },
 ];
 

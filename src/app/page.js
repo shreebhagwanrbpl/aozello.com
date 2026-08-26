@@ -11,12 +11,12 @@ export default function Home({ city = "" }) {
     <>
       <HeroSection city={city} />
       <TrustedBrands city={city} />
-      {/* <WhyChooseUs city={city} /> */}
+      <WhyChooseUs city={city} />
       <StatsSection city={city} />
       <ServicesPreview city={city} />
-      {/* <SeoContent city={city} /> */}
       <Testimonials city={city} />
       <CTASection city={city} />
+      <SeoContent city={city} />
     </>
   );
 }

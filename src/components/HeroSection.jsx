@@ -16,12 +16,15 @@ import {
 export default function  HeroSection({ city }) {
   const [loading, setLoading] = useState(true);
 
-  const [heroData, setHeroData] = useState({
-    title: "",
-    description: "",
-    button1Text: "",
-    button2Text: "",
-  });
+  const defaultHero = {
+    title: "India's Premier Biomedical & Diagnostic Analyzer Solutions",
+    description:
+      "Empowering hospitals, pathology labs, and healthcare institutions across India with high-precision clinical analyzers, certified OEM reagents, and dedicated 24/7 technical support.",
+    button1Text: "Explore Products",
+    button2Text: "Contact Us",
+  };
+
+  const [heroData, setHeroData] = useState(defaultHero);
 
   useEffect(() => {
     const fetchHeroData = async () => {
@@ -31,7 +34,13 @@ export default function  HeroSection({ city }) {
         );
 
         if (snap.exists()) {
-          setHeroData(snap.data());
+          const data = snap.data();
+          setHeroData({
+            title: data.title || defaultHero.title,
+            description: data.description || defaultHero.description,
+            button1Text: data.button1Text || defaultHero.button1Text,
+            button2Text: data.button2Text || defaultHero.button2Text,
+          });
         }
       } catch (error) {
         console.error("Error fetching hero data:", error);

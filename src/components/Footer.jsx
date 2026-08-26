@@ -12,7 +12,6 @@ export default function Footer() {
   const [contactInfo, setContactInfo] = useState([]);
   const [loading, setLoading] = useState(true);
   const [districtData, setDistrictData] = useState(null);
-
   const pathname = usePathname();
   const pathParts = pathname.split("/").filter(Boolean);
 
@@ -136,8 +135,7 @@ export default function Footer() {
             </Link>
 
             <p className="mt-4 text-slate-600 text-sm leading-6">
-              Delivering trusted diagnostic and biomedical solutions with
-              innovation, quality, and precision healthcare support.
+              Empowering clinical laboratories and hospitals across India with high-precision analyzers, genuine OEM reagents, and dedicated maintenance support.
             </p>
 
             {/* Social Media Links */}

@@ -77,16 +77,16 @@ export default function CTASection({ city }) {
             {/* Left */}
             <div>
 
-              <span className="inline-flex items-center rounded-full border text-wight border-orange/20 bg-black px-5 py-2 text-sm font-semibold backdrop-blur-lg">
-                Get In Touch
+              <span className="inline-flex items-center rounded-full border text-white border-white/20 bg-slate-900/80 px-5 py-2 text-sm font-semibold backdrop-blur-lg">
+                Get In Touch With Experts
               </span>
 
-              <h2 className="mt-6 text-4xl lg:text-6xl font-black leading-tight">
-                Need Premium Biomedical Solutions?
+              <h2 className="mt-6 text-4xl lg:text-5xl font-black leading-tight text-slate-900">
+                Ready to Upgrade Your Laboratory Setup?
               </h2>
 
-              <p className="mt-6 max-w-xl text-lg leading-8 text-white/85">
-                Discover innovative diagnostic systems and trusted biomedical technologies tailored for modern healthcare excellence.
+              <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
+                Partner with Rajbiosis Private Limited for advanced clinical analyzers, OEM testing reagents, and fast breakdown service support.
               </p>
 
             </div>
@@ -94,7 +94,7 @@ export default function CTASection({ city }) {
             {/* Right Card */}
             <div className="flex lg:justify-end">
 
-              <div className="w-full max-w-md rounded-[32px] bg-white p-8 shadow-2xl">
+              <div className="w-full max-w-md rounded-[32px] bg-white p-8 shadow-2xl border border-slate-100">
 
                 {/* Icon */}
                 <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-red-600">
@@ -102,13 +102,13 @@ export default function CTASection({ city }) {
                 </div>
 
                 {/* Heading */}
-                <h3 className="text-3xl font-bold text-red-600">
-                  Let's Talk
+                <h3 className="text-3xl font-bold text-slate-900">
+                  Speak With Our Specialists
                 </h3>
 
                 {/* Text */}
                 <p className="mt-4 leading-7 text-slate-600">
-                  Contact our biomedical experts for consultation, equipment, and healthcare support.
+                  Call our technical team for instant equipment pricing, AMC quotes, or reagent availability.
                 </p>
 
                 {/* Buttons */}
@@ -118,8 +118,8 @@ export default function CTASection({ city }) {
                     href={makeLink("/contact")}
                     className="w-full"
                   >
-                    <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                      Contact Us
+                    <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer">
+                      Send An Inquiry
                       <ArrowRight size={18} />
                     </button>
                   </Link>
@@ -128,7 +128,7 @@ export default function CTASection({ city }) {
                     href="tel:+919983123469"
                     className="rounded-2xl border-2 border-red-200 px-6 py-4 text-center font-semibold text-red-600 transition-all duration-300 hover:bg-red-50 flex items-center justify-center gap-2"
                   >
-                    Call Now (9983123469)
+                    Call Now (+91 9983123469)
                   </a>
 
                 </div>

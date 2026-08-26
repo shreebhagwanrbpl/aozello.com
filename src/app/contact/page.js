@@ -15,7 +15,6 @@ export default function ContactPage() {
   const [districtData, setDistrictData] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const pathname = usePathname();
-
   const pathParts = pathname.split("/").filter(Boolean);
   const currentDistrict = pathParts.length > 0 ? pathParts[0] : null;
 
@@ -150,8 +149,8 @@ export default function ContactPage() {
     <>
       {/* Banner */}
       <PageBanner
-        title="Contact Us"
-        subtitle="Get in touch with Rajbiosis Private Limited for premium diagnostic and biomedical solutions."
+        title="Contact Rajbiosis Private Limited"
+        subtitle="Get in touch with our biomedical specialists for equipment inquiries, reagent orders, AMC support, or turnkey laboratory consultancy."
       />
 
       {/* Contact Section */}
@@ -159,16 +158,16 @@ export default function ContactPage() {
         <div className="container-custom grid lg:grid-cols-2 gap-14">
           {/* Left Info */}
           <div>
-            <span className="inline-block bg-red-50 text-red-700 px-5 py-2 rounded-full font-bold text-xs uppercase tracking-wider mb-5">
-              Contact Information
+            <span className="inline-block bg-red-50 text-red-700 px-5 py-2 rounded-full font-bold text-xs uppercase tracking-wider mb-5 border border-red-100">
+              Get In Touch
             </span>
 
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
-              Let's Start a Conversation
+              Connect With Our Biomedical Experts
             </h2>
 
             <p className="text-slate-600 mt-4 text-base leading-8">
-              Reach out to us for healthcare consultation, biomedical equipment sales, service maintenance, and advanced diagnostic support.
+              Whether you need urgent breakdown assistance, price quotations for diagnostic analyzers, OEM reagent supplies, or advice on setting up a new lab, our experienced team is here to assist you.
             </p>
 
             {/* Contact Cards */}
@@ -182,8 +181,7 @@ export default function ContactPage() {
                   <h4 className="font-bold text-lg text-slate-900">Phone Number</h4>
                   <a
                     href={`tel:${telNumber}`}
-                    className="text-slate-700 hover:text-red-600 transition font-bold text-lg mt-1 inline-block"
-                  >
+                    className="text-slate-700 hover:text-red-600 transition font-bold text-lg mt-1 inline-block">
                     +91 {phone}
                   </a>
                 </div>

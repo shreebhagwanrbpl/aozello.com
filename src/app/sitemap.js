@@ -4,14 +4,12 @@ import { collection, getDocs } from "firebase/firestore";
 import { makeSlug } from "@/lib/seo-utils";
 import { MAIN_CATEGORIES, FEATURED_BRANDS } from "@/lib/constants";
 
-export const revalidate = 3600; // Revalidate sitemap hourly
-
+export const revalidate = 3600; 
 export default async function sitemap() {
   const baseUrl = "https://aozello.com";
   const urls = [];
   const currentDate = new Date();
 
-  // 1. Static Key Pages
   urls.push(
     { url: baseUrl, lastModified: currentDate, changeFrequency: "daily", priority: 1.0 },
     { url: `${baseUrl}/about`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
@@ -20,7 +18,6 @@ export default async function sitemap() {
     { url: `${baseUrl}/items`, lastModified: currentDate, changeFrequency: "daily", priority: 0.9 }
   );
 
-  // 2. Category Hub Pages
   MAIN_CATEGORIES.forEach((cat) => {
     urls.push({
       url: `${baseUrl}/category/${cat.slug}`,
@@ -30,7 +27,6 @@ export default async function sitemap() {
     });
   });
 
-  // 3. Brand Hub Pages
   FEATURED_BRANDS.forEach((brand) => {
     urls.push({
       url: `${baseUrl}/brand/${makeSlug(brand)}`,
@@ -41,7 +37,7 @@ export default async function sitemap() {
   });
 
   try {
-    // 4. Products Catalog Pages
+    
     const products = await fetchFullCatalog();
     const uniqueSlugs = new Set();
 
@@ -57,7 +53,7 @@ export default async function sitemap() {
       });
     });
 
-    // 5. Verified District Location Pages
+
     const districtSnap = await getDocs(
       collection(db, "websites", "aozellocom", "districts")
     );
@@ -67,8 +63,8 @@ export default async function sitemap() {
       const slug = data.slug || makeSlug(data.district || docSnap.id);
 
       if (!slug) return;
+      
 
-      // Add main district location hub
       urls.push({
         url: `${baseUrl}/${slug}`,
         lastModified: currentDate,
