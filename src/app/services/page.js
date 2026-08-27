@@ -93,8 +93,8 @@ export default function ServicesPage() {
         <div className="container-custom">
           <SectionTitle
             badge="What We Offer"
-            title="Premium Biomedical & Diagnostic Services"
-            description="We provide innovative healthcare and biomedical solutions tailored for modern clinical diagnostics, pathology laboratories, and hospital excellence."
+            title="Complete Healthcare & Laboratory Solutions"
+            description="Our product range is designed to meet the evolving requirements of modern healthcare facilities, from everyday laboratory needs to specialized diagnostic applications. With a focus on performance, reliability, and professional support, we help healthcare institutions build efficient and well-equipped diagnostic environments."
             center
           />
 
@@ -183,8 +183,9 @@ export default function ServicesPage() {
         <div className="container-custom">
           <SectionTitle
             badge="How We Work"
-            title="Simple & Professional Process"
-            description="We follow a streamlined 3-step process to deliver reliable biomedical and healthcare solutions."
+            title="How We Make Healthcare Solutions Simple"
+            description="From understanding your requirements to delivering the right products, we keep every step clear, efficient, and focused on your needs. Our approach is designed to make sourcing medical and laboratory solutions easier for hospitals, clinics, laboratories, and diagnostic centers.
+              Requirement → Product Selection → Reliable Delivery"
             center
           />
 

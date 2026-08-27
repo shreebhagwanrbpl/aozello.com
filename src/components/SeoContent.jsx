@@ -31,57 +31,64 @@ export default function SeoContent({ city = "" }) {
 
                 {/* FAQ Section */}
 
-                <div className="mt-16 border-t border-slate-100 pt-12">
+            <div className="mt-16 border-t border-slate-100 pt-12">
+    <h2 className="text-3xl font-bold text-slate-900 mb-8">
+        Need to Know More?
+    </h2>
 
-                    <h2 className="text-3xl font-bold text-slate-900 mb-8">
-                        Frequently Asked Questions
-                    </h2>
+    <div className="space-y-6">
 
-                    <div className="space-y-6">
+        <div>
+            <h3 className="font-semibold text-xl text-slate-900">
+                What types of laboratory products can I purchase from you?
+            </h3>
 
-                        <div>
-                            <h3 className="font-semibold text-xl text-slate-900">
-                                Do you supply diagnostic analyzers and reagents across India?
-                            </h3>
+            <p className="text-slate-600 mt-2">
+                We offer a wide range of laboratory and diagnostic products, including
+                hematology analyzers, biochemistry systems, electrolyte analyzers,
+                urine analyzers, diagnostic kits, reagents, consumables, and other
+                essential laboratory equipment.
+            </p>
+        </div>
 
-                            <p className="text-slate-600 mt-2">
-                                Yes, Rajbiosis Private Limited supplies biomedical instruments, OEM reagents, and diagnostic consumables across all states and districts in India with fast express delivery.
-                            </p>
-                        </div>
+        <div>
+            <h3 className="font-semibold text-xl text-slate-900">
+                Are your products suitable for hospitals and diagnostic laboratories?
+            </h3>
 
-                        <div>
-                            <h3 className="font-semibold text-xl text-slate-900">
-                                Which clinical laboratory instruments do you supply?
-                            </h3>
+            <p className="text-slate-600 mt-2">
+                Yes. Our product range is suitable for hospitals, pathology labs,
+                diagnostic centers, clinics, medical institutions, and other
+                healthcare facilities with different testing requirements.
+            </p>
+        </div>
 
-                            <p className="text-slate-600 mt-2">
-                                We supply CBC Hematology Analyzers, Semi & Fully Automated Biochemistry Analyzers, Electrolyte Analyzers, Urine Chemistry Analyzers, Rapid Diagnostic Kits, and ELISA Readers.
-                            </p>
-                        </div>
+        <div>
+            <h3 className="font-semibold text-xl text-slate-900">
+                Do you offer support after the purchase?
+            </h3>
 
-                        <div>
-                            <h3 className="font-semibold text-xl text-slate-900">
-                                Do you provide AMC / CMC maintenance and breakdown support?
-                            </h3>
+            <p className="text-slate-600 mt-2">
+                We provide product guidance and technical assistance to help customers
+                with equipment installation, operation, maintenance, troubleshooting,
+                and other service requirements.
+            </p>
+        </div>
 
-                            <p className="text-slate-600 mt-2">
-                                Yes, we provide Annual Maintenance Contracts (AMC), Comprehensive Maintenance Contracts (CMC), rapid engineer dispatch, emergency breakdown repairs, and genuine replacement spare parts.
-                            </p>
-                        </div>
+        <div>
+            <h3 className="font-semibold text-xl text-slate-900">
+                Can you help us choose the right equipment for our laboratory?
+            </h3>
 
-                        <div>
-                            <h3 className="font-semibold text-xl text-slate-900">
-                                Can you assist in setting up a new pathology laboratory?
-                            </h3>
+            <p className="text-slate-600 mt-2">
+                Certainly. Our team can understand your laboratory requirements,
+                testing volume, workflow, and application needs to help you identify
+                suitable instruments, reagents, and supporting laboratory products.
+            </p>
+        </div>
 
-                            <p className="text-slate-600 mt-2">
-                                Absolutely. We offer end-to-end turnkey lab setup consulting, space layout planning, equipment selection, installation, calibration, and operational training for your lab technicians.
-                            </p>
-                        </div>
-
-                    </div>
-
-                </div>
+    </div>
+</div>
 
             </div>
         </section>

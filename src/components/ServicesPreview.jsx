@@ -55,8 +55,9 @@ export default function ServicesPreview() {
         {/* Title */}
         <SectionTitle
           badge="Our Services"
-          title="Comprehensive Biomedical & Diagnostic Solutions"
-          description="Delivering cutting-edge clinical analyzers, original testing reagents, and round-the-clock technical service for medical institutions across India."
+          title="Everything Your Laboratory Needs"
+          description="From essential laboratory supplies to specialized diagnostic equipment, we help healthcare facilities source the products they need from one place. Our solutions are selected to support everyday testing, laboratory efficiency, and dependable clinical operations.
+        Medical Equipment • Lab Consumables • Diagnostic Products • Technical Assistance"
           center
         />
 
