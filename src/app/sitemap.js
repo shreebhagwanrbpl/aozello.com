@@ -1,79 +1,57 @@
-import { fetchFullCatalog } from "@/lib/data-fetcher-server";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
 import { makeSlug } from "@/lib/seo-utils";
 import { MAIN_CATEGORIES, FEATURED_BRANDS } from "@/lib/constants";
+import { fetchFullCatalog, fetchDistricts } from "@/lib/data-fetcher";
+import { WEBSITE_ID } from "@/lib/catalog-utils";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-export const revalidate = 3600; 
+const BASE_URL = "https://aozello.com";
+
 export default async function sitemap() {
-  const baseUrl = "https://aozello.com";
-  const urls = [];
-  const currentDate = new Date();
+  const [products, districts] = await Promise.all([
+    fetchFullCatalog({ websiteId: WEBSITE_ID }),
+    fetchDistricts({ websiteId: WEBSITE_ID }).catch(() => []),
+  ]);
 
-  urls.push(
-    { url: baseUrl, lastModified: currentDate, changeFrequency: "daily", priority: 1.0 },
-    { url: `${baseUrl}/about`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/services`, lastModified: currentDate, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${baseUrl}/contact`, lastModified: currentDate, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/items`, lastModified: currentDate, changeFrequency: "daily", priority: 0.9 }
-  );
+  const now = new Date();
+  const urls = [
+    { url: BASE_URL, lastModified: now },
+    { url: `${BASE_URL}/about`, lastModified: now },
+    { url: `${BASE_URL}/services`, lastModified: now },
+    { url: `${BASE_URL}/contact`, lastModified: now },
+    { url: `${BASE_URL}/items`, lastModified: now },
+  ];
 
-  MAIN_CATEGORIES.forEach((cat) => {
-    urls.push({
-      url: `${baseUrl}/category/${cat.slug}`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    });
-  });
+  const seen = new Set(urls.map((item) => item.url));
+  for (const district of districts) {
+    const slug = district.slug || district.id;
+    if (!slug) continue;
+    const base = `${BASE_URL}/${slug}`;
+    for (const suffix of ["", "/about", "/services", "/contact", "/items"]) {
+      const url = `${base}${suffix}`;
+      if (!seen.has(url)) {
+        seen.add(url);
+        urls.push({ url, lastModified: now });
+      }
+    }
+  }
 
-  FEATURED_BRANDS.forEach((brand) => {
-    urls.push({
-      url: `${baseUrl}/brand/${makeSlug(brand)}`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    });
-  });
-
-  try {
-    
-    const products = await fetchFullCatalog();
-    const uniqueSlugs = new Set();
-
-    products.forEach((product) => {
-      if (!product.slug || uniqueSlugs.has(product.slug)) return;
-      uniqueSlugs.add(product.slug);
-
-      urls.push({
-        url: `${baseUrl}/items/${product.slug}`,
-        lastModified: currentDate,
-        changeFrequency: "weekly",
-        priority: 0.9,
-      });
-    });
-
-
-    const districtSnap = await getDocs(
-      collection(db, "websites", "aozellocom", "districts")
-    );
-
-    districtSnap.docs.forEach((docSnap) => {
-      const data = docSnap.data();
-      const slug = data.slug || makeSlug(data.district || docSnap.id);
-
-      if (!slug) return;
-      
-
-      urls.push({
-        url: `${baseUrl}/${slug}`,
-        lastModified: currentDate,
-        changeFrequency: "weekly",
-        priority: 0.8,
-      });
-    });
-  } catch (error) {
-    console.error("[Sitemap Generation Error]:", error);
+  for (const product of products) {
+    if (!product.slug) continue;
+    const url = `${BASE_URL}/items/${product.slug}`;
+    if (!seen.has(url)) {
+      seen.add(url);
+      urls.push({ url, lastModified: now });
+    }
+    for (const district of districts) {
+      const districtSlug = district.slug || district.id;
+      if (!districtSlug) continue;
+      const districtUrl = `${BASE_URL}/${districtSlug}/items/${product.slug}`;
+      if (!seen.has(districtUrl)) {
+        seen.add(districtUrl);
+        urls.push({ url: districtUrl, lastModified: now });
+      }
+    }
   }
 
   return urls;

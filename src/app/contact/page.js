@@ -1,16 +1,15 @@
 "use client";
-
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { doc, getDoc, addDoc, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import toast from "react-hot-toast";
 import { Mail, Phone, MapPin, Clock3 } from "lucide-react";
-
+import { useContactInfo } from "@/lib/useContactInfo";
+import { phoneHref, mailHref } from "@/lib/contact-utils";
 import PageBanner from "@/components/PageBanner";
 import CTASection from "@/components/CTASection";
-
 export default function ContactPage() {
+  const { phones, emails, address } = useContactInfo();
+
   const [loading, setLoading] = useState(true);
   const [districtData, setDistrictData] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -58,13 +57,15 @@ export default function ContactPage() {
     try {
       setSubmitting(true);
 
-      await addDoc(
-        collection(db, "websitesQueries", "aozellocom", "contactQueries"),
-        {
-          ...form,
-          createdAt: new Date(),
-        }
-      );
+      await fetch("/api/contact-query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form }),
+      }).then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || "Submission failed");
+        return result;
+      });
 
       toast.success("Message submitted successfully");
 
@@ -88,9 +89,11 @@ export default function ContactPage() {
       if (!currentDistrict) return;
 
       try {
-        const snap = await getDoc(
-          doc(db, "websites", "aozellocom", "districts", currentDistrict)
-        );
+        const snap = await (async () => {
+          const response = await fetch(`/api/site-data?pageType=district&district=${encodeURIComponent(currentDistrict)}`, { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
+          const json = await response.json().catch(() => ({}));
+          return { exists: () => !!json.data, data: () => json.data || {} };
+        })();
 
         if (snap.exists()) {
           setDistrictData(snap.data());
@@ -104,12 +107,11 @@ export default function ContactPage() {
     setLoading(false);
   }, [currentDistrict]);
 
-  const phone = "9983123469";
-  const telNumber = "+919983123469";
-  const email = "rajbiosis@yahoo.in";
-  const defaultAddress =
-    "F-4, 1st Floor, Plot No. 16, D-Block Tagor Nagar, on Ajmer-Delhi, 200 Feet Bypass Rd, Jaipur, Rajasthan 302021";
-  const workingHours = "9:00 AM - 9:00 PM";
+  const phone = phones[0] || "";
+  const telNumber = phoneHref(phone);
+  const email = emails[0] || "";
+  const defaultAddress = address || "";
+  const workingHours = "";
 
   const dynamicAddress = districtData
     ? `${districtData.district}, ${districtData.state}, India`
@@ -180,7 +182,7 @@ export default function ContactPage() {
                 <div>
                   <h4 className="font-bold text-lg text-slate-900">Phone Number</h4>
                   <a
-                    href={`tel:${telNumber}`}
+                    href={telNumber || "#"}
                     className="text-slate-700 hover:text-red-600 transition font-bold text-lg mt-1 inline-block">
                     +91 {phone}
                   </a>
@@ -195,7 +197,7 @@ export default function ContactPage() {
                 <div>
                   <h4 className="font-bold text-lg text-slate-900">Email Address</h4>
                   <a
-                    href={`mailto:${email}`}
+                    href={mailHref(email) || "#"}
                     className="text-slate-700 hover:text-red-600 transition font-medium mt-1 inline-block text-base"
                   >
                     {email}

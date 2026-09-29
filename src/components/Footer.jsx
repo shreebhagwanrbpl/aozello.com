@@ -1,13 +1,10 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getContactValue, parseContactValues, phoneHref, mailHref } from "@/lib/contact-utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { FaInstagram, FaFacebook } from "react-icons/fa";
-
 export default function Footer() {
   const [contactInfo, setContactInfo] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,9 +28,11 @@ export default function Footer() {
   useEffect(() => {
     const loadContact = async () => {
       try {
-        const snap = await getDoc(
-          doc(db, "websites", "aozellocom", "pages", "contact")
-        );
+        const snap = await (async () => {
+          const response = await fetch("/api/site-data?pageType=contact", { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
+          const json = await response.json().catch(() => ({}));
+          return { exists: () => !!json.data, data: () => json.data || {} };
+        })();
 
         if (snap.exists()) {
           setContactInfo(snap.data().contactInfo || []);
@@ -53,9 +52,11 @@ export default function Footer() {
       if (!district) return;
 
       try {
-        const snap = await getDoc(
-          doc(db, "websites", "aozellocom", "districts", district)
-        );
+        const snap = await (async () => {
+          const response = await fetch(`/api/site-data?pageType=district&district=${encodeURIComponent(district)}`, { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
+          const json = await response.json().catch(() => ({}));
+          return { exists: () => !!json.data, data: () => json.data || {} };
+        })();
 
         if (snap.exists()) {
           setDistrictData(snap.data());
@@ -68,12 +69,14 @@ export default function Footer() {
     loadDistrict();
   }, [district]);
 
-  const displayPhone = "9983123469";
-  const telNumber = "+919983123469";
-  const email = "rajbiosis@yahoo.in";
-  const defaultAddress =
-    "F-4, 1st Floor, Plot No. 16, D-Block Tagor Nagar, on Ajmer-Delhi, 200 Feet Bypass Rd, Jaipur, Rajasthan 302021";
-
+  const phoneValue = getContactValue(contactInfo, ["Phone", "Phone Number", "Mobile", "Mobile Number", "Contact"]);
+  const phoneNumbers = parseContactValues(phoneValue);
+  const displayPhone = phoneNumbers[0] || "";
+  const telNumber = phoneHref(displayPhone);
+  const email = getContactValue(contactInfo, ["Email", "Email Address", "Mail"]);
+  const emailAddresses = parseContactValues(email);
+  const emailValue = emailAddresses[0] || "";
+  const defaultAddress = getContactValue(contactInfo, ["Address", "Office Address"]);
   const dynamicAddress = districtData
     ? `${districtData.district}, ${districtData.state}, India`
     : defaultAddress;
@@ -244,12 +247,13 @@ export default function Footer() {
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 text-white flex items-center justify-center shadow-md flex-shrink-0">
                   <Phone size={16} />
                 </div>
-                <a
-                  href={`tel:${telNumber}`}
-                  className="hover:text-red-600 transition font-bold text-slate-800 text-sm"
-                >
-                  +91 {displayPhone}
-                </a>
+                <div>
+                  {phoneNumbers.map((number, index) => (
+                    <a key={index} href={phoneHref(number) || "#"} className="block hover:text-red-600 transition font-bold text-slate-800 text-sm">
+                      {number}
+                    </a>
+                  ))}
+                </div>
               </div>
 
               {/* Email */}
@@ -257,12 +261,13 @@ export default function Footer() {
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 text-white flex items-center justify-center shadow-md flex-shrink-0">
                   <Mail size={16} />
                 </div>
-                <a
-                  href={`mailto:${email}`}
-                  className="hover:text-red-600 transition font-medium text-slate-700 text-xs"
-                >
-                  {email}
-                </a>
+                <div>
+                  {emailAddresses.map((address, index) => (
+                    <a key={index} href={mailHref(address) || "#"} className="block hover:text-red-600 transition font-medium text-slate-700 text-xs">
+                      {address}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

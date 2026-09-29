@@ -7,7 +7,6 @@ import {
   DEFAULT_ADDRESS,
   DEFAULT_SEO_QUALITY_THRESHOLD
 } from "./constants";
-
 export function makeSlug(text = "") {
   return text
     .toLowerCase()

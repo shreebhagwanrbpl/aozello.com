@@ -1,9 +1,9 @@
 export const SITE_URL = "https://aozello.com";
 export const COMPANY_NAME = "Rajbiosis Private Limited";
 export const COMPANY_SHORT_NAME = "Rajbiosis";
-export const DEFAULT_PHONE = "+91 9983123469";
-export const DEFAULT_PHONE_RAW = "+919983123469";
-export const DEFAULT_EMAIL = "rajbiosis@yahoo.in";
+export const DEFAULT_PHONE = "";
+export const DEFAULT_PHONE_RAW = "";
+export const DEFAULT_EMAIL = "";
 export const DEFAULT_ADDRESS = "F-4, 1st Floor, Plot No. 16, D-Block Tagor Nagar, on Ajmer-Delhi, 200 Feet Bypass Rd, Jaipur, Rajasthan 302021";
 
 export const DEFAULT_SEO_QUALITY_THRESHOLD = 70;

@@ -1,10 +1,8 @@
 "use client";
-
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 

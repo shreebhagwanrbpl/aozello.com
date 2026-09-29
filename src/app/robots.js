@@ -14,4 +14,4 @@ export default function robots() {
         ],
         sitemap: "https://aozello.com/sitemap.xml",
     };
-}
+}

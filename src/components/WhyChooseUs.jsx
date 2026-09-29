@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import {
   ShieldCheck,
@@ -7,9 +6,7 @@ import {
   HeartPulse,
   BadgeCheck,
 } from "lucide-react";
-
 import SectionTitle from "./SectionTitle";
-
 export default function WhyChooseUs() {
   const features = [
     {

@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import {
     generateProductSchema,
@@ -10,7 +9,6 @@ import {
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { usePathname } from "next/navigation";
-
 import {
     FaPlay,
     FaShareAlt,
@@ -21,13 +19,12 @@ import {
     FaFilePdf,
     FaDownload,
 } from "react-icons/fa";
-
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { fetchFullCatalog } from "@/lib/data-fetcher";
+import { useContactInfo } from "@/lib/useContactInfo";
 import { generateBrochurePDF } from "@/lib/generateBrochurePDF";
-
 export default function ProductDetails({ slug, product: initialProduct }) {
+    const { primaryPhone, primaryPhoneHref, primaryWhatsAppHref } = useContactInfo();
+
     const [product, setProduct] = useState(initialProduct || null);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [selectedImage, setSelectedImage] = useState(() => {
@@ -64,7 +61,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
         try {
             setGeneratingPDF(true);
             toast.loading("Generating product brochure PDF...", { id: "pdf-toast" });
-            await generateBrochurePDF(product, selectedImage);
+            await generateBrochurePDF(product, selectedImage, { phone: primaryPhone });
             toast.success("Brochure downloaded successfully!", { id: "pdf-toast" });
         } catch (err) {
             console.error("Failed to generate PDF:", err);
@@ -134,22 +131,21 @@ export default function ProductDetails({ slug, product: initialProduct }) {
         try {
             setSubmitting(true);
 
-            await addDoc(
-                collection(
-                    db,
-                    "websitesQueries",
-                    "aozellocom",
-                    "productQueries"
-                ),
-                {
-                    ...form,
-                    productName: product.title,
-                    productSlug: product.slug,
-                    brand: product.brand || "",
-                    model: product.model || "",
-                    createdAt: new Date(),
-                }
-            );
+            await fetch("/api/product-query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          productName: product?.title || "",
+          productSlug: product?.slug || "",
+          brand: product?.brand || "",
+          model: product?.model || "",
+        }),
+      }).then(async (response) => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.success === false) throw new Error(result.error || "Submission failed");
+        return result;
+      });
 
             toast.success("Your enquiry has been submitted successfully.");
 
@@ -179,7 +175,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
         },
         {
             question: `How can I request a quotation or price details for ${product.title}?`,
-            answer: `You can request an instant quotation by filling out the enquiry form on this page or calling our technical helpline directly at +91 9983123469.`
+            answer: `You can request an instant quotation by filling out the enquiry form on this page or calling our technical helpline directly.`
         }
     ] : [];
 
@@ -749,7 +745,7 @@ export default function ProductDetails({ slug, product: initialProduct }) {
                                 How can I request a quotation for {product.title}?
                             </h4>
                             <p className="text-slate-600 text-sm mt-2 leading-6">
-                                Simply fill out the Request A Quote form on this page or call our team directly at +91 9983123469.
+                                Simply fill out the Request A Quote form on this page or call our team directly.
                             </p>
                         </div>
 

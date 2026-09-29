@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import {
   Microscope,
@@ -7,10 +6,8 @@ import {
   ShieldCheck,
   Stethoscope,
 } from "lucide-react";
-
 import SectionTitle from "./SectionTitle";
 import ServiceCard from "./ServiceCard";
-
 export default function ServicesPreview() {
   const services = [
     {

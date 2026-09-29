@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import {
   Users,
@@ -7,7 +6,6 @@ import {
   BadgeCheck,
   Building2,
 } from "lucide-react";
-
 export default function StatsSection() {
   const stats = [
     {

@@ -1,5 +1,4 @@
 import { generateCanonicalUrl } from "@/lib/seo-utils";
-
 export async function generateMetadata({ params }) {
   const { district = "jaipur" } = await params;
 

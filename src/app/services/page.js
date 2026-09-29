@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import {
   Microscope,
@@ -12,14 +11,10 @@ import {
   Clock,
   CheckCircle2,
 } from "lucide-react";
-
 import PageBanner from "@/components/PageBanner";
 import SectionTitle from "@/components/SectionTitle";
 import ServiceCard from "@/components/ServiceCard";
 import CTASection from "@/components/CTASection";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-
 const defaultServices = [
   {
     title: "Clinical Diagnostic Equipment Supply",
@@ -63,9 +58,11 @@ export default function ServicesPage() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const snap = await getDoc(
-          doc(db, "websites", "aozellocom", "pages", "services")
-        );
+        const snap = await (async () => {
+          const response = await fetch("/api/site-data?pageType=services", { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
+          const json = await response.json().catch(() => ({}));
+          return { exists: () => !!json.data, data: () => json.data || {} };
+        })();
 
         if (snap.exists() && snap.data().services?.length > 1) {
           setServices(snap.data().services);
@@ -83,10 +80,7 @@ export default function ServicesPage() {
   return (
     <>
       {/* Banner */}
-      <PageBanner
-        title="Our Services"
-        subtitle="Delivering trusted biomedical, diagnostic analyzer, and laboratory services with innovation, precision, and healthcare excellence."
-      />
+
 
       {/* Services Grid */}
       <section className="section-padding bg-white relative">
@@ -101,27 +95,27 @@ export default function ServicesPage() {
           <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mt-16">
             {loading
               ? Array.from({ length: 6 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-[30px] p-10 card-shadow border border-slate-100 animate-pulse"
-                  >
-                    <div className="w-20 h-20 rounded-3xl bg-slate-200 mb-8" />
-                    <div className="h-8 bg-slate-200 rounded mb-6" />
-                    <div className="space-y-3">
-                      <div className="h-4 bg-slate-200 rounded" />
-                      <div className="h-4 bg-slate-200 rounded w-11/12" />
-                      <div className="h-4 bg-slate-200 rounded w-8/12" />
-                    </div>
+                <div
+                  key={index}
+                  className="bg-white rounded-[30px] p-10 card-shadow border border-slate-100 animate-pulse"
+                >
+                  <div className="w-20 h-20 rounded-3xl bg-slate-200 mb-8" />
+                  <div className="h-8 bg-slate-200 rounded mb-6" />
+                  <div className="space-y-3">
+                    <div className="h-4 bg-slate-200 rounded" />
+                    <div className="h-4 bg-slate-200 rounded w-11/12" />
+                    <div className="h-4 bg-slate-200 rounded w-8/12" />
                   </div>
-                ))
+                </div>
+              ))
               : services.map((service, index) => (
-                  <ServiceCard
-                    key={index}
-                    icon={icons[index % icons.length]}
-                    title={service.title}
-                    description={service.desc || service.description}
-                  />
-                ))}
+                <ServiceCard
+                  key={index}
+                  icon={icons[index % icons.length]}
+                  title={service.title}
+                  description={service.desc || service.description}
+                />
+              ))}
           </div>
         </div>
       </section>

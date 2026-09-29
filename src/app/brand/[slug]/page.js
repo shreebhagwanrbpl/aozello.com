@@ -11,7 +11,6 @@ import {
   generateBreadcrumbSchema,
 } from "@/lib/seo-utils";
 import { FEATURED_BRANDS } from "@/lib/constants";
-
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const brandName = slug

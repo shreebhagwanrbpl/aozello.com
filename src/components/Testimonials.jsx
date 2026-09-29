@@ -1,8 +1,6 @@
 "use client";
-
 import { motion } from "framer-motion";
 import SectionTitle from "./SectionTitle";
-
 export default function Testimonials() {
   const reviews = [
     {

@@ -1,45 +1,35 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-
 import {
   ArrowRight,
   ShieldCheck,
   BadgeCheck,
   Microscope,
 } from "lucide-react";
-
 export default function  HeroSection({ city }) {
   const [loading, setLoading] = useState(true);
 
-  const defaultHero = {
-    title: "India's Premier Biomedical & Diagnostic Analyzer Solutions",
-    description:
-      "Empowering hospitals, pathology labs, and healthcare institutions across India with high-precision clinical analyzers, certified OEM reagents, and dedicated 24/7 technical support.",
-    button1Text: "Explore Products",
-    button2Text: "Contact Us",
-  };
-
-  const [heroData, setHeroData] = useState(defaultHero);
+  const [heroData, setHeroData] = useState({ title: "", description: "", button1Text: "", button2Text: "", badge: "" });
 
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        const snap = await getDoc(
-          doc(db, "websites", "aozellocom", "pages", "home")
-        );
+        const snap = await (async () => {
+          const response = await fetch("/api/site-data?pageType=home", { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
+          const json = await response.json().catch(() => ({}));
+          return { exists: () => !!json.data, data: () => json.data || {} };
+        })();
 
         if (snap.exists()) {
-          const data = snap.data();
+          const data = snap.data() || {};
           setHeroData({
-            title: data.title || defaultHero.title,
-            description: data.description || defaultHero.description,
-            button1Text: data.button1Text || defaultHero.button1Text,
-            button2Text: data.button2Text || defaultHero.button2Text,
+            title: data.title || "",
+            description: data.description || "",
+            button1Text: data.button1Text || "",
+            button2Text: data.button2Text || "",
+            badge: data.badge || "",
           });
         }
       } catch (error) {
@@ -75,16 +65,14 @@ export default function  HeroSection({ city }) {
           transition={{ duration: 0.65, ease: "easeOut" }}
           className="max-w-2xl"
         >
-          {/* Small Trust Label */}
-          <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-red-100 bg-white px-4 py-2 shadow-sm">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-500 text-white">
-              <ShieldCheck size={16} />
-            </span>
-
-            <span className="text-sm font-semibold text-slate-700">
-              Trusted Biomedical Systems
-            </span>
-          </div>
+          {heroData.badge ? (
+            <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-red-100 bg-white px-4 py-2 shadow-sm">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-600 to-orange-500 text-white">
+                <ShieldCheck size={16} />
+              </span>
+              <span className="text-sm font-semibold text-slate-700">{heroData.badge}</span>
+            </div>
+          ) : null}
 
           {/* Heading */}
           {loading ? (
@@ -148,22 +136,22 @@ export default function  HeroSection({ city }) {
               </>
             ) : (
               <>
-                <Link href={makeLink("/items")}>
+                {heroData.button1Text ? <Link href={makeLink("/items")}>
                   <button className="group inline-flex h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 font-semibold text-white shadow-lg shadow-red-500/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                    {heroData.button1Text || "Explore Products"}
+                    {heroData.button1Text}
 
                     <ArrowRight
                       size={17}
                       className="transition-transform duration-300 group-hover:translate-x-1"
                     />
                   </button>
-                </Link>
+                </Link> : null}
 
-                <Link href={makeLink("/contact")}>
+                {heroData.button2Text ? <Link href={makeLink("/contact")}>
                   <button className="h-11 rounded-xl border border-slate-200 bg-white px-6 font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-red-200 hover:bg-red-50 hover:text-red-600">
-                    {heroData.button2Text || "Contact Us"}
+                    {heroData.button2Text}
                   </button>
-                </Link>
+                </Link> : null}
               </>
             )}
           </div>

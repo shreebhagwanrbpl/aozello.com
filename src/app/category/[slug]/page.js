@@ -12,7 +12,6 @@ import {
   generateBreadcrumbSchema,
 } from "@/lib/seo-utils";
 import { MAIN_CATEGORIES } from "@/lib/constants";
-
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const category = MAIN_CATEGORIES.find((c) => c.slug === slug) || {

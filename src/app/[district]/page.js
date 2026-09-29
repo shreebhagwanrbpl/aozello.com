@@ -1,8 +1,8 @@
 import Home from "@/app/page";
 import { generateLocalBusinessSchema, generateBreadcrumbSchema } from "@/lib/seo-utils";
 import Link from "next/link";
+import DynamicPhoneLink from "@/components/DynamicPhoneLink";
 import { MAIN_CATEGORIES, FEATURED_BRANDS } from "@/lib/constants";
-
 export default async function DistrictPage({ params }) {
   const { district = "jaipur" } = await params;
 
@@ -32,9 +32,7 @@ export default async function DistrictPage({ params }) {
       <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-3 border-b border-red-700">
         <div className="container-custom flex items-center justify-between text-xs md:text-sm font-semibold">
           <span>📍 Serving Hospitals & Pathology Labs in {districtName} & Nearby Regions</span>
-          <a href="tel:+919983123469" className="underline hover:text-amber-200">
-            Helpline: +91 9983123469
-          </a>
+          <DynamicPhoneLink className="underline hover:text-amber-200" prefix="Helpline: " />
         </div>
       </div>
 

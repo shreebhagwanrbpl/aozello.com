@@ -2,7 +2,6 @@ import ProductDetails from "./ProductDetails";
 import { fetchFullCatalog } from "@/lib/data-fetcher-server";
 import { makeSlug, generateCanonicalUrl } from "@/lib/seo-utils";
 import { notFound } from "next/navigation";
-
 export async function generateMetadata({ params }) {
     const { slug } = await params;
     const allProducts = await fetchFullCatalog();

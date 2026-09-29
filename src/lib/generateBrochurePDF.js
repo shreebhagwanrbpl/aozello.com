@@ -1,9 +1,8 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-
 /**
  * Robust image loader using server-side proxy endpoint to bypass CORS policy.
- * Converts Firebase Storage URLs or external product photos to Base64 data URLs
+ * Converts remote image storage URLs or external product photos to Base64 data URLs
  * guaranteeing 100% successful rendering in html2canvas.
  */
 async function getBase64Image(src) {
@@ -32,7 +31,7 @@ async function getBase64Image(src) {
     }
   }
 
-  // Remote images (Firebase Storage, external CDN, etc.) -> Call server-side proxy API
+  // Remote images (remote image storage, external CDN, etc.) -> Call server-side proxy API
   if (src.startsWith("http")) {
     try {
       const proxyApi = `/api/proxy-image?url=${encodeURIComponent(src)}`;
@@ -79,7 +78,7 @@ async function getBase64Image(src) {
  * Generates and downloads a high-resolution PDF brochure for a product
  * matching the official Rajbiosis Private Limited specification brochure template.
  */
-export async function generateBrochurePDF(product, currentSelectedImage = null) {
+export async function generateBrochurePDF(product, currentSelectedImage = null, contactData = {}) {
   if (!product) return;
 
   const title = product.title || "Biomedical Product";
@@ -145,7 +144,7 @@ export async function generateBrochurePDF(product, currentSelectedImage = null) 
             <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1;">Rajbiosis Private Limited</div>
           </div>
           <div style="text-align: right; font-size: 12.5px; font-weight: 500; line-height: 1.4;">
-            <div><strong>Phone:</strong> +91 9983123469</div>
+            <div><strong>Phone:</strong> ${contactData?.phone || ""}</div>
             <div style="opacity: 0.9; margin-top: 2px;"><strong>Web:</strong> www.aozello.com</div>
           </div>
         </div>

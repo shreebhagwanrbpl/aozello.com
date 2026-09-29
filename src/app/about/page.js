@@ -2,7 +2,6 @@ import PageBanner from "@/components/PageBanner";
 import SectionTitle from "@/components/SectionTitle";
 import CTASection from "@/components/CTASection";
 import { ShieldCheck, Award, Users, HeartHandshake, CheckCircle2, Microscope, Wrench, PackageCheck } from "lucide-react";
-
 export default function AboutPage() {
   return (
     <>

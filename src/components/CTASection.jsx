@@ -1,14 +1,15 @@
 "use client";
-
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useContactInfo } from "@/lib/useContactInfo";
 import {
   ArrowRight,
   PhoneCall,
 } from "lucide-react";
-
 export default function CTASection({ city }) {
+  const { primaryPhone, primaryPhoneHref } = useContactInfo();
+
 
   const pathname = usePathname();
 
@@ -125,10 +126,10 @@ export default function CTASection({ city }) {
                   </Link>
 
                   <a
-                    href="tel:+919983123469"
+                    href={primaryPhoneHref || "#"}
                     className="rounded-2xl border-2 border-red-200 px-6 py-4 text-center font-semibold text-red-600 transition-all duration-300 hover:bg-red-50 flex items-center justify-center gap-2"
                   >
-                    Call Now (+91 9983123469)
+                    Call Now {primaryPhone}
                   </a>
 
                 </div>

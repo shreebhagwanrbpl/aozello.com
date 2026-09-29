@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-
 const ProductCard = React.memo(function ProductCard({ product, district }) {
     return (
         <div
