@@ -8,39 +8,44 @@ import {
   BadgeCheck,
   Microscope,
 } from "lucide-react";
-export default function  HeroSection({ city }) {
-  const [loading, setLoading] = useState(true);
+export default function HeroSection({ city }) {
+  const [loading, setLoading] = useState(false);
 
-  const [heroData, setHeroData] = useState({ title: "", description: "", button1Text: "", button2Text: "", badge: "" });
+  const [heroData, setHeroData] = useState({
+    title: "Hospital Diagnostic Systems, Laboratory Instrumentation & Biomedical Devices",
+    description: "From advanced clinical chemistry and hematology systems to rapid diagnostic test kits and point-of-care instruments, Raj Biosis supplies certified, dependable biomedical equipment engineered for clinical precision and continuous lab uptime.",
+    button1Text: "Discover Medical Devices",
+    button2Text: "Request Consultation",
+    badge: "Biomedical & Laboratory Solutions",
+  });
 
   useEffect(() => {
+    let isMounted = true;
     const fetchHeroData = async () => {
       try {
-        const snap = await (async () => {
-          const response = await fetch("/api/site-data?pageType=home", { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
-          const json = await response.json().catch(() => ({}));
-          return { exists: () => !!json.data, data: () => json.data || {} };
-        })();
-
-        if (snap.exists()) {
-          const data = snap.data() || {};
-          setHeroData({
-            title: data.title || "",
-            description: data.description || "",
-            button1Text: data.button1Text || "",
-            button2Text: data.button2Text || "",
-            badge: data.badge || "",
-          });
+        const response = await fetch("/api/site-data?pageType=home");
+        const json = await response.json().catch(() => ({}));
+        if (json?.data && isMounted) {
+          const data = json.data;
+          setHeroData((prev) => ({
+            title: data.title || prev.title,
+            description: data.description || prev.description,
+            button1Text: data.button1Text || prev.button1Text,
+            button2Text: data.button2Text || prev.button2Text,
+            badge: data.badge || prev.badge,
+          }));
         }
       } catch (error) {
-        console.error("Error fetching hero data:", error);
-      } finally {
-        setLoading(false);
+        console.warn("Could not fetch hero data:", error);
       }
     };
 
     fetchHeroData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
 
   // District routing
   const districtSlug = city

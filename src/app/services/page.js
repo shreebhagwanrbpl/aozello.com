@@ -56,25 +56,30 @@ export default function ServicesPage() {
   ];
 
   useEffect(() => {
+    let isMounted = true;
     const fetchServices = async () => {
       try {
-        const snap = await (async () => {
-          const response = await fetch("/api/site-data?pageType=services", { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
-          const json = await response.json().catch(() => ({}));
-          return { exists: () => !!json.data, data: () => json.data || {} };
-        })();
+        const response = await fetch("/api/site-data?pageType=services");
+        const json = await response.json().catch(() => ({}));
+        const rawServices =
+          json?.data?.services ||
+          json?.services ||
+          (Array.isArray(json?.data) ? json.data : null);
 
-        if (snap.exists() && snap.data().services?.length > 1) {
-          setServices(snap.data().services);
+        if (Array.isArray(rawServices) && rawServices.length > 0 && isMounted) {
+          setServices(rawServices);
         }
       } catch (error) {
-        console.error("Error fetching services:", error);
+        console.warn("Error fetching services:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchServices();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

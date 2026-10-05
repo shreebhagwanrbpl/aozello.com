@@ -1,32 +1,29 @@
-import { fetchFullCatalog, fetchCategoriesTree } from "@/lib/data-fetcher";
-import { COMPANY_ID, WEBSITE_ID } from "@/lib/catalog-utils";
+import { fetchFullCatalog, fetchCategoriesTree } from "@/lib/data-fetcher-server";
+import { WEBSITE_ID, COMPANY_ID } from "@/lib/catalog-utils";
+
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
-const headers = {
-  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-};
-
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const websiteId = searchParams.get("websiteId") || WEBSITE_ID;
-
+export async function GET() {
   try {
     const [products, categories] = await Promise.all([
-      fetchFullCatalog({ companyId: COMPANY_ID, websiteId }),
-      fetchCategoriesTree({ companyId: COMPANY_ID, websiteId }),
+      fetchFullCatalog({ websiteId: WEBSITE_ID, companyId: COMPANY_ID }),
+      fetchCategoriesTree({ websiteId: WEBSITE_ID, companyId: COMPANY_ID }),
     ]);
 
     return Response.json(
-      { success: true, companyId: COMPANY_ID, websiteId, products, categories },
-      { headers }
+      { success: true, companyId: COMPANY_ID, websiteId: WEBSITE_ID, products, categories },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
     );
   } catch (error) {
-    console.error("catalog GET failed:", error);
+    console.error("Catalog API error:", error);
     return Response.json(
-      { success: false, products: [], categories: [], error: error.message },
-      { status: 500, headers }
+      { success: false, products: [], categories: [], error: error.message || "Catalog unavailable" },
+      { status: 500 }
     );
   }
 }
+

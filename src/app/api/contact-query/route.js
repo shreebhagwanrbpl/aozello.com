@@ -1,11 +1,14 @@
 import { postAdminQuery } from "@/lib/admin-api";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export async function POST(request) {
   try {
     const payload = await request.json();
     const result = await postAdminQuery("/api/contact-query", payload);
+
     return Response.json(
       { success: true, data: result },
       { headers: { "Cache-Control": "no-store" } }

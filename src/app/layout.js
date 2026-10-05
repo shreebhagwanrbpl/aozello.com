@@ -1,7 +1,7 @@
-import CatalogRealtimeSync from "@/components/CatalogRealtimeSync";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CatalogRealtimeSync from "@/components/CatalogRealtimeSync";
 import { Toaster } from "react-hot-toast";
 import { generateOrganizationSchema } from "@/lib/seo-utils";
 export const metadata = {
@@ -94,11 +94,12 @@ export default function RootLayout({ children }) {
             }}
           />
 
+          <CatalogRealtimeSync />
+
           {children}
         </main>
 
         <Footer />
-      <CatalogRealtimeSync />
       </body>
     </html>
   );

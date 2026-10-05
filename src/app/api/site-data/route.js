@@ -1,27 +1,52 @@
-import { fetchSitePage } from "@/lib/data-fetcher";
+import {
+  fetchHomeData,
+  fetchContactData,
+  fetchServicesData,
+  fetchDistrictData,
+  fetchSitePage,
+} from "@/lib/data-fetcher-server";
 import { WEBSITE_ID } from "@/lib/catalog-utils";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
-const headers = {
-  "Content-Type": "application/json; charset=utf-8",
-  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-};
+export const dynamic = "force-dynamic";
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const pageType = searchParams.get("pageType") || "home";
-  const district = searchParams.get("district");
+  const params = new URL(request.url).searchParams;
+  const page =
+    params.get("page") ||
+    params.get("pageType") ||
+    params.get("type") ||
+    "home";
+  const district = params.get("district");
 
   try {
-    const data = district ? await (await import("@/lib/data-fetcher")).fetchDistrictData(district) : await fetchSitePage(pageType, WEBSITE_ID);
-    return Response.json({ success: true, websiteId: WEBSITE_ID, pageType, data }, { headers });
-  } catch (error) {
-    console.error("site-data GET failed:", error);
+    let data = null;
+
+    if (district || page === "district") {
+      data = await fetchDistrictData(district);
+    } else if (page === "home") {
+      data = await fetchHomeData();
+    } else if (page === "contact") {
+      data = await fetchContactData();
+    } else if (page === "services") {
+      data = await fetchServicesData();
+    } else {
+      data = await fetchSitePage(page, WEBSITE_ID);
+    }
+
     return Response.json(
-      { success: false, error: error.message, data: null },
-      { status: 500, headers }
+      { success: true, websiteId: WEBSITE_ID, pageType: page, data: data || {} },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Site data API error:", error);
+    return Response.json(
+      { success: false, error: error.message || "Site data unavailable", data: null },
+      { status: 500 }
     );
   }
 }
+

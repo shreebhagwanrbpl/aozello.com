@@ -13,6 +13,7 @@ export default function CatalogRealtimeSync() {
     const refresh = () => router.refresh();
 
     source.addEventListener("catalog-changed", refresh);
+
     return () => {
       source.removeEventListener("catalog-changed", refresh);
       source.close();

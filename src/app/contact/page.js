@@ -7,15 +7,21 @@ import { useContactInfo } from "@/lib/useContactInfo";
 import { phoneHref, mailHref } from "@/lib/contact-utils";
 import PageBanner from "@/components/PageBanner";
 import CTASection from "@/components/CTASection";
-export default function ContactPage() {
+import { DEFAULT_ADDRESS, DEFAULT_PHONE, DEFAULT_EMAIL } from "@/lib/constants";
+
+export default function ContactPage({ city = null }) {
   const { phones, emails, address } = useContactInfo();
 
-  const [loading, setLoading] = useState(true);
   const [districtData, setDistrictData] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const pathname = usePathname();
   const pathParts = pathname.split("/").filter(Boolean);
-  const currentDistrict = pathParts.length > 0 ? pathParts[0] : null;
+
+  const staticRoutes = ["about", "services", "products", "contact", "items"];
+  const currentDistrict =
+    pathParts.length > 0 && !staticRoutes.includes(pathParts[0])
+      ? pathParts[0]
+      : null;
 
   const [form, setForm] = useState({
     name: "",
@@ -85,73 +91,55 @@ export default function ContactPage() {
   };
 
   useEffect(() => {
+    if (!currentDistrict) return;
+    let isMounted = true;
+
     const loadDistrict = async () => {
-      if (!currentDistrict) return;
-
       try {
-        const snap = await (async () => {
-          const response = await fetch(`/api/site-data?pageType=district&district=${encodeURIComponent(currentDistrict)}`, { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
-          const json = await response.json().catch(() => ({}));
-          return { exists: () => !!json.data, data: () => json.data || {} };
-        })();
-
-        if (snap.exists()) {
-          setDistrictData(snap.data());
+        const response = await fetch(
+          `/api/site-data?pageType=district&district=${encodeURIComponent(currentDistrict)}`
+        );
+        const json = await response.json().catch(() => ({}));
+        if (json?.data && isMounted) {
+          setDistrictData(json.data);
         }
       } catch (err) {
-        console.log(err);
+        console.warn("District fetch error in contact page:", err);
       }
     };
 
     loadDistrict();
-    setLoading(false);
+    return () => {
+      isMounted = false;
+    };
   }, [currentDistrict]);
 
-  const phone = phones[0] || "";
+  const phone = phones[0] || DEFAULT_PHONE;
   const telNumber = phoneHref(phone);
-  const email = emails[0] || "";
-  const defaultAddress = address || "";
-  const workingHours = "";
+  const email = emails[0] || DEFAULT_EMAIL;
+  const defaultAddress = address || DEFAULT_ADDRESS;
 
-  const dynamicAddress = districtData
-    ? `${districtData.district}, ${districtData.state}, India`
-    : defaultAddress;
+  const dynamicAddress = city
+    ? `${city}, India`
+    : districtData?.district
+      ? `${districtData.district}, ${districtData.state || "India"}`
+      : defaultAddress;
 
-  const mapAddress = encodeURIComponent(defaultAddress);
+  const mapQueryTarget = city
+    ? `${city}, Rajasthan, India`
+    : districtData?.district
+      ? `${districtData.district}, ${districtData.state || "India"}`
+      : "RAJ BIOSIS PRIVATE LIMITED, Jaipur";
 
-  if (loading) {
-    return (
-      <section className="section-padding">
-        <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <div>
-              <div className="h-12 w-64 bg-slate-200 rounded animate-pulse mb-8" />
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-28 bg-slate-200 rounded-3xl animate-pulse mb-6"
-                />
-              ))}
-            </div>
-            <div className="bg-white p-10 rounded-3xl">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-14 bg-slate-200 rounded-2xl animate-pulse mb-5"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapQueryTarget)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  const mapDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQueryTarget)}`;
+  const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQueryTarget)}`;
 
   return (
     <>
       {/* Banner */}
       <PageBanner
-        title="Contact Rajbiosis Private Limited"
+        title={city ? `Contact Rajbiosis in ${city}` : "Contact Rajbiosis Private Limited"}
         subtitle="Get in touch with our biomedical specialists for equipment inquiries, reagent orders, AMC support, or turnkey laboratory consultancy."
       />
 
@@ -214,19 +202,6 @@ export default function ContactPage() {
                   <h4 className="font-bold text-lg text-slate-900">Office Address</h4>
                   <p className="text-slate-600 mt-1 text-sm leading-6">
                     {dynamicAddress}
-                  </p>
-                </div>
-              </div>
-
-              {/* Working Hours Card */}
-              <div className="flex items-start gap-5 bg-slate-50 p-6 rounded-[28px] border border-slate-100 shadow-sm hover:shadow-md transition duration-300">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-red-500/20 flex-shrink-0">
-                  <Clock3 size={24} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg text-slate-900">Working Hours</h4>
-                  <p className="text-slate-700 font-semibold mt-1 text-base">
-                    {workingHours}
                   </p>
                 </div>
               </div>
@@ -293,20 +268,6 @@ export default function ContactPage() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  name="subject"
-                  placeholder="Inquiry subject"
-                  value={form.subject}
-                  onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 outline-none focus:border-red-600 focus:ring-2 focus:ring-red-100 text-sm transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Message *
                 </label>
                 <textarea
@@ -335,18 +296,49 @@ export default function ContactPage() {
       <section className="pb-24 bg-white">
         <div className="container-custom">
           <div className="text-center max-w-2xl mx-auto mb-8">
-            <h3 className="text-2xl font-bold text-slate-900">Locate Our Office</h3>
-            <p className="text-slate-500 text-sm mt-1">Visit our office on Ajmer-Delhi 200 Feet Bypass Road, Jaipur, Rajasthan</p>
+            <h3 className="text-2xl font-bold text-slate-900">
+              {city || districtData?.district ? `Locate Our ${city || districtData?.district} Office` : "Locate Our Office"}
+            </h3>
+            <p className="text-slate-500 text-sm mt-1">{dynamicAddress}</p>
           </div>
-          <div className="rounded-[36px] overflow-hidden border border-slate-200 shadow-xl">
+          <div className="rounded-[36px] overflow-hidden border border-slate-200 shadow-xl relative group">
             <iframe
-              src={`https://maps.google.com/maps?q=${mapAddress}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+              src={mapEmbedUrl}
               width="100%"
               height="480"
               loading="lazy"
               className="border-0 w-full"
               title="Rajbiosis Private Limited Office Location"
             ></iframe>
+            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-md border border-slate-100 flex items-center gap-2 z-10">
+              <a
+                href={mapSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-bold text-slate-800 hover:text-red-600 transition flex items-center gap-1.5"
+              >
+                <span>Open in Maps</span>
+                <span className="text-slate-400 text-xs">↗</span>
+              </a>
+            </div>
+            <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-3 z-10">
+              <a
+                href={mapSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-semibold text-slate-700 hover:text-red-600 transition"
+              >
+                Open in Maps ↗
+              </a>
+              <a
+                href={mapDirectionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-1.5 rounded-xl bg-red-600 !text-white text-xs font-bold hover:bg-red-700 transition flex items-center gap-1 shadow-sm"
+              >
+                Directions →
+              </a>
+            </div>
           </div>
         </div>
       </section>

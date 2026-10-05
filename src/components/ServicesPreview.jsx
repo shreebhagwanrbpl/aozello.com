@@ -1,40 +1,81 @@
 "use client";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Microscope,
   FlaskConical,
   ShieldCheck,
   Stethoscope,
+  Wrench,
+  Activity,
 } from "lucide-react";
 import SectionTitle from "./SectionTitle";
 import ServiceCard from "./ServiceCard";
+
+const defaultServices = [
+  {
+    title: "Diagnostic Equipment Supply",
+    description:
+      "Fully automated hematology counters, biochemistry analyzers, and electrolyte testing instruments engineered for clinical precision.",
+  },
+  {
+    title: "OEM Reagents & Supplies",
+    description:
+      "High-grade biochemistry reagents, diluents, calibrators, and rapid diagnostic test kits with fast pan-India express dispatch.",
+  },
+  {
+    title: "AMC / CMC Maintenance",
+    description:
+      "Flexible Annual & Comprehensive Maintenance Contracts to eliminate laboratory downtime and extend instrument lifespan.",
+  },
+  {
+    title: "Turnkey Lab Consultancy",
+    description:
+      "End-to-end consulting, spatial layout planning, equipment procurement, and technician operational training for new labs.",
+  },
+];
+
+const icons = [
+  <Microscope key={0} size={30} className="text-red-600" />,
+  <FlaskConical key={1} size={30} className="text-blue-600" />,
+  <ShieldCheck key={2} size={30} className="text-emerald-600" />,
+  <Stethoscope key={3} size={30} className="text-red-500" />,
+  <Wrench key={4} size={30} className="text-orange-500" />,
+  <Activity key={5} size={30} className="text-purple-600" />,
+];
+
 export default function ServicesPreview() {
-  const services = [
-    {
-      icon: <Microscope size={30} />,
-      title: "Diagnostic Equipment Supply",
-      description:
-        "Fully automated hematology counters, biochemistry analyzers, and electrolyte testing instruments engineered for clinical precision.",
-    },
-    {
-      icon: <FlaskConical size={30} />,
-      title: "OEM Reagents & Supplies",
-      description:
-        "High-grade biochemistry reagents, diluents, calibrators, and rapid diagnostic test kits with fast pan-India express dispatch.",
-    },
-    {
-      icon: <ShieldCheck size={30} />,
-      title: "AMC / CMC Maintenance",
-      description:
-        "Flexible Annual & Comprehensive Maintenance Contracts to eliminate laboratory downtime and extend instrument lifespan.",
-    },
-    {
-      icon: <Stethoscope size={30} />,
-      title: "Turnkey Lab Consultancy",
-      description:
-        "End-to-end consulting, spatial layout planning, equipment procurement, and technician operational training for new labs.",
-    },
-  ];
+  const [services, setServices] = useState(defaultServices);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadServices = async () => {
+      try {
+        const response = await fetch("/api/site-data?pageType=services");
+        const json = await response.json().catch(() => ({}));
+        const rawServices =
+          json?.data?.services ||
+          json?.services ||
+          (Array.isArray(json?.data) ? json.data : null);
+
+        if (Array.isArray(rawServices) && rawServices.length > 0 && isMounted) {
+          setServices(
+            rawServices.slice(0, 4).map((s) => ({
+              title: s.title || "",
+              description: s.desc || s.description || "",
+            }))
+          );
+        }
+      } catch (e) {
+        console.warn("ServicesPreview fetch error:", e);
+      }
+    };
+    loadServices();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
 
   return (
     <section className="section-padding relative overflow-hidden bg-gradient-to-br from-rose-50 via-white to-orange-50">

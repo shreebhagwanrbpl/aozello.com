@@ -3,208 +3,299 @@ import {
   WEBSITE_ID,
   makeSlug,
   isItemVisibleOnWebsite,
-} from "./catalog-utils";
+} from "./catalog-utils.js";
 import {
-  readDocument,
-  readDocumentsWhereCollection,
-} from "./sqliteDb";
+  adminFetch,
+  fetchCatalogPayloadFromAdmin,
+} from "./admin-api.js";
+
 export { makeSlug };
 
-function normalizeProduct(p = {}, catId = "", catName = "", subId = "", subName = "", fallbackIdx = 0) {
-  const title = p.title || p.name || "";
-  const images = Array.isArray(p.images) && p.images.length
-    ? p.images
-    : (p.image ? [p.image] : (p.originalImages || []));
+function normalizeProduct(product = {}, fallbackIdx = 0) {
+  const title = product.title || product.name || "Biomedical Equipment";
+
+  const images =
+    Array.isArray(product.images) && product.images.length
+      ? product.images
+      : product.image
+        ? [product.image]
+        : product.imageUrl
+          ? [product.imageUrl]
+          : product.imgUrl
+            ? [product.imgUrl]
+            : [];
+
+  const fallbackId = `${makeSlug(title) || "product"}-${fallbackIdx}`;
 
   return {
-    ...p,
-    id: p.id || p.productId || `${catId}-${subId}-${fallbackIdx}`,
-    productId: p.productId || p.id || `${catId}-${subId}-${fallbackIdx}`,
-    uid: p.uid || p.id || p.productId || `${catId}-${subId}-${fallbackIdx}`,
+    ...product,
+    id: product.id || product.uid || product.productId || fallbackId,
+    productId: product.productId || product.id || product.uid || fallbackId,
+    uid: product.uid || product.id || product.productId || fallbackId,
     title,
     name: title,
-    slug: p.slug || makeSlug(title),
-    price: p.price ?? "",
-    desc: p.desc ?? p.description ?? "",
-    description: p.description ?? p.desc ?? "",
-    category: catName || p.category || catId,
-    categoryId: p.categoryId || catId || "",
-    subCategory: subName || p.subCategory || subId,
-    subcategoryId: p.subcategoryId || subId || "",
-    companyId: p.companyId || COMPANY_ID,
+    slug: product.slug || makeSlug(title),
+    price: product.price ?? "",
+    desc: product.desc ?? product.description ?? "",
+    description: product.description ?? product.desc ?? "",
+    category: product.category || "Diagnostic & Laboratory Equipment",
+    categoryId:
+      product.categoryId ||
+      product.categoryID ||
+      makeSlug(product.category || "diagnostic"),
+    subCategory:
+      product.subCategory ||
+      product.subcategory ||
+      product.category ||
+      "General",
+    subcategoryId:
+      product.subcategoryId ||
+      product.subCategoryId ||
+      makeSlug(
+        product.subCategory ||
+          product.subcategory ||
+          product.category ||
+          "general"
+      ),
+    companyId: product.companyId || COMPANY_ID,
     images,
-    image: images[0] || p.image || "",
-    video: p.video || "",
-    pdf: p.pdf || "",
-    brand: p.brand || "",
-    model: p.model || "",
-    capacity: p.capacity || "",
-    throughput: p.throughput || "",
-    instrument: p.instrument || "",
-    usage: p.usage || "",
-    parameters: p.parameters || "",
-    automation: p.automation || "",
-    availability: p.availability || "",
-    size: p.size || "",
-    isPublished: p.isPublished !== false,
-    websiteIds: Array.isArray(p.websiteIds) ? p.websiteIds : p.websiteIds,
+    image: images[0] || product.image || "",
+    video: product.video || "",
+    pdf: product.pdf || "",
+    brand: product.brand || "",
+    model: product.model || "",
+    capacity: product.capacity || "",
+    throughput: product.throughput || "",
+    instrument: product.instrument || "",
+    usage: product.usage || "",
+    parameters: product.parameters || "",
+    automation: product.automation || "",
+    availability: product.availability || "",
+    size: product.size || "",
+    isPublished: product.isPublished !== false,
+    websiteIds: Array.isArray(product.websiteIds) ? product.websiteIds : product.websiteIds,
   };
 }
 
-function categoryPath(categoryId) {
-  return `companies/${COMPANY_ID}/categories/${categoryId}`;
+function unwrapSiteData(json) {
+  return json?.data ?? json?.pages ?? json ?? null;
 }
 
-function subcategoryPath(categoryId) {
-  return `${categoryPath(categoryId)}/subcategories`;
-}
+// -------------------------------------------------------------
+// In-Memory Global Cache & In-Flight Promise Deduplication
+// -------------------------------------------------------------
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-export async function fetchFullCatalog({ companyId = COMPANY_ID, websiteId = WEBSITE_ID } = {}) {
-  const allProducts = [];
-  const categories = readDocumentsWhereCollection(`companies/${companyId}/categories`);
+let catalogCache = {
+  products: null,
+  categories: null,
+  timestamp: 0,
+  promise: null,
+};
 
-  const visibleCategoryIds = new Set();
-  const visibleCategoryNames = new Set();
-  const visibleSubcategoryIds = new Set();
-  const visibleSubcategoryNames = new Set();
+const siteDataCache = new Map();
+const siteDataPromises = new Map();
 
-  for (const row of categories) {
-    const cat = { id: row.doc_id, ...row.data };
-    if (!isItemVisibleOnWebsite(cat, websiteId)) continue;
+async function getCachedCatalogPayload({ companyId = COMPANY_ID, websiteId = WEBSITE_ID } = {}) {
+  const now = Date.now();
 
-    visibleCategoryIds.add(cat.id);
-    const categoryName = cat.name || cat.category || cat.id;
-    visibleCategoryNames.add(String(categoryName).toLowerCase().replace(/[^a-z0-9]/g, ""));
+  // Return existing valid cache
+  if (
+    catalogCache.products &&
+    catalogCache.categories &&
+    now - catalogCache.timestamp < CACHE_TTL_MS
+  ) {
+    return {
+      products: catalogCache.products,
+      categories: catalogCache.categories,
+    };
+  }
 
-    // Products embedded in category document.
-    if (Array.isArray(cat.products)) {
-      cat.products.forEach((product, idx) => {
-        if (isItemVisibleOnWebsite(product, websiteId)) {
-          allProducts.push(normalizeProduct(
-            product, cat.id, categoryName, product.subcategoryId || "", product.subCategory || "", `cat-${idx}`
-          ));
-        }
-      });
-    }
+  // If already fetching in-flight, return the same promise to prevent concurrent hammering
+  if (catalogCache.promise) {
+    return catalogCache.promise;
+  }
 
-    const subs = readDocumentsWhereCollection(subcategoryPath(cat.id));
-    for (const subRow of subs) {
-      const sub = { id: subRow.doc_id, ...subRow.data };
-      if (!isItemVisibleOnWebsite(sub, websiteId)) continue;
+  // Start fresh fetch with promise deduplication
+  catalogCache.promise = (async () => {
+    try {
+      const payload = await fetchCatalogPayloadFromAdmin();
+      const rawProducts = Array.isArray(payload.products) ? payload.products : [];
+      const rawCategories = Array.isArray(payload.categories) ? payload.categories : [];
 
-      visibleSubcategoryIds.add(`${cat.id}/${sub.id}`);
-      const subName = sub.name || sub.subCategory || sub.id;
-      visibleSubcategoryNames.add(String(subName).toLowerCase().replace(/[^a-z0-9]/g, ""));
+      // 1. Process and normalize products
+      const filteredProducts = rawProducts
+        .filter((item) => isItemVisibleOnWebsite(item, websiteId))
+        .map((item, idx) => normalizeProduct(item, idx));
 
-      if (Array.isArray(sub.products)) {
-        sub.products.forEach((product, idx) => {
-          if (isItemVisibleOnWebsite(product, websiteId)) {
-            allProducts.push(normalizeProduct(
-              product, cat.id, categoryName, sub.id, subName, `embedded-${idx}`
-            ));
-          }
-        });
+      // 2. Process and normalize categories
+      let processedCategories = [];
+      if (rawCategories.length > 0) {
+        processedCategories = rawCategories
+          .filter((cat) => isItemVisibleOnWebsite(cat, websiteId))
+          .map((category) => ({
+            ...category,
+            id: category.id || category.categoryId || makeSlug(category.name || category.category || "general"),
+            name: category.name || category.category || category.title || "General",
+            category: category.category || category.name || category.title || "General",
+            slug: category.slug || makeSlug(category.name || category.category || "general"),
+            subcategories: Array.isArray(category.subcategories)
+              ? category.subcategories
+                  .filter((sub) => isItemVisibleOnWebsite(sub, websiteId))
+                  .map((sub) => ({
+                    ...sub,
+                    id: sub.id || sub.subcategoryId || makeSlug(sub.name || sub.subCategory || "general"),
+                    name: sub.name || sub.subCategory || "General",
+                    subCategory: sub.subCategory || sub.name || "General",
+                    slug: sub.slug || makeSlug(sub.name || sub.subCategory || "general"),
+                    productsCount:
+                      sub.productsCount ??
+                      (Array.isArray(sub.products) ? sub.products.length : 0),
+                  }))
+              : [],
+            totalProductsCount:
+              category.totalProductsCount ??
+              (Array.isArray(category.products) ? category.products.length : 0),
+          }));
       }
 
-      const subProducts = readDocumentsWhereCollection(
-        `${categoryPath(cat.id)}/subcategories/${sub.id}/products`
-      );
-      subProducts.forEach((productRow, idx) => {
-        const product = { id: productRow.doc_id, ...productRow.data };
-        if (isItemVisibleOnWebsite(product, websiteId)) {
-          allProducts.push(normalizeProduct(
-            product, cat.id, categoryName, sub.id, subName, `sqlite-${idx}`
-          ));
+      // If categories not in payload or empty, derive from products
+      if (processedCategories.length === 0 && filteredProducts.length > 0) {
+        const categoryMap = new Map();
+
+        for (const product of filteredProducts) {
+          const categoryId = product.categoryId || makeSlug(product.category || "general");
+          const categoryName = product.category || categoryId;
+
+          if (!categoryMap.has(categoryId)) {
+            categoryMap.set(categoryId, {
+              id: categoryId,
+              name: categoryName,
+              category: categoryName,
+              slug: makeSlug(categoryName),
+              products: [],
+              subcategories: new Map(),
+            });
+          }
+
+          const category = categoryMap.get(categoryId);
+          category.products.push(product);
+
+          const subcategoryId = product.subcategoryId || makeSlug(product.subCategory || "general");
+          const subcategoryName = product.subCategory || subcategoryId;
+
+          if (!category.subcategories.has(subcategoryId)) {
+            category.subcategories.set(subcategoryId, {
+              id: subcategoryId,
+              name: subcategoryName,
+              subCategory: subcategoryName,
+              slug: makeSlug(subcategoryName),
+              products: [],
+              productsCount: 0,
+            });
+          }
+
+          const subcategory = category.subcategories.get(subcategoryId);
+          subcategory.products.push(product);
+          subcategory.productsCount += 1;
         }
-      });
+
+        processedCategories = [...categoryMap.values()].map((cat) => ({
+          ...cat,
+          subcategories: [...cat.subcategories.values()],
+          totalProductsCount: cat.products.length,
+        }));
+      }
+
+      // Store in global cache
+      catalogCache.products = filteredProducts;
+      catalogCache.categories = processedCategories;
+      catalogCache.timestamp = Date.now();
+
+      return {
+        products: filteredProducts,
+        categories: processedCategories,
+      };
+    } catch (err) {
+      console.error("Admin catalog fetch error:", err);
+      // If stale cache exists, serve stale data instead of failing
+      if (catalogCache.products && catalogCache.categories) {
+        console.warn("Serving stale cached catalog data due to fetch failure");
+        return {
+          products: catalogCache.products,
+          categories: catalogCache.categories,
+        };
+      }
+      return { products: [], categories: [] };
+    } finally {
+      catalogCache.promise = null;
     }
-  }
+  })();
 
-  // Master / standalone products. Category and subcategory hierarchy is also verified.
-  const masterProducts = readDocumentsWhereCollection(`companies/${companyId}/products`);
-  masterProducts.forEach((row, idx) => {
-    const product = { id: row.doc_id, ...row.data };
-    if (!isItemVisibleOnWebsite(product, websiteId)) return;
-
-    const categoryId = product.categoryId || product.categoryID || "";
-    const subcategoryId = product.subcategoryId || product.subCategoryId || "";
-
-    if (categoryId && !visibleCategoryIds.has(categoryId)) return;
-    if (!categoryId && product.category && visibleCategoryNames.size) {
-      const categoryKey = String(product.category).toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (!visibleCategoryNames.has(categoryKey)) return;
-    }
-    if (subcategoryId && categoryId && !visibleSubcategoryIds.has(`${categoryId}/${subcategoryId}`)) return;
-    if (!subcategoryId && product.subCategory && visibleSubcategoryNames.size) {
-      const subKey = String(product.subCategory).toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (!visibleSubcategoryNames.has(subKey)) return;
-    }
-
-    allProducts.push(normalizeProduct(
-      product,
-      categoryId || "master",
-      product.category || "General Products",
-      subcategoryId || "general",
-      product.subCategory || "General Products",
-      `master-${idx}`
-    ));
-  });
-
-  // De-duplicate products while preserving first occurrence.
-  const unique = [];
-  const seen = new Set();
-  for (const product of allProducts) {
-    const key = product.id || product.productId || product.slug;
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    unique.push(product);
-  }
-  return unique;
+  return catalogCache.promise;
 }
 
-export async function fetchCategoriesTree({ companyId = COMPANY_ID, websiteId = WEBSITE_ID } = {}) {
-  const categories = readDocumentsWhereCollection(`companies/${companyId}/categories`);
-  const result = [];
+export async function fetchFullCatalog(options = {}) {
+  const { products } = await getCachedCatalogPayload(options);
+  return products || [];
+}
 
-  for (const row of categories) {
-    const category = { id: row.doc_id, ...row.data };
-    if (!isItemVisibleOnWebsite(category, websiteId)) continue;
+export async function fetchCategoriesTree(options = {}) {
+  const { categories } = await getCachedCatalogPayload(options);
+  return categories || [];
+}
 
-    const subcategories = [];
-    const subs = readDocumentsWhereCollection(subcategoryPath(category.id));
-
-    for (const subRow of subs) {
-      const sub = { id: subRow.doc_id, ...subRow.data };
-      if (!isItemVisibleOnWebsite(sub, websiteId)) continue;
-
-      const embedded = Array.isArray(sub.products)
-        ? sub.products.filter((p) => isItemVisibleOnWebsite(p, websiteId))
-        : [];
-
-      const childProducts = readDocumentsWhereCollection(
-        `${categoryPath(category.id)}/subcategories/${sub.id}/products`
-      ).map((p) => ({ id: p.doc_id, ...p.data }))
-       .filter((p) => isItemVisibleOnWebsite(p, websiteId));
-
-      subcategories.push({
-        ...sub,
-        products: [...embedded, ...childProducts],
-        productsCount: embedded.length + childProducts.length,
-      });
-    }
-
-    result.push({
-      ...category,
-      subcategories,
-      totalProductsCount: subcategories.reduce((sum, s) => sum + (s.productsCount || 0), 0),
-    });
-  }
-
-  return result;
+export async function fetchCatalogCategories(options = {}) {
+  const tree = await fetchCategoriesTree(options);
+  return tree.map((category) => category.name || category.category || category.id);
 }
 
 export async function fetchSitePage(pageType, websiteId = WEBSITE_ID) {
-  return readDocument(`websites/${COMPANY_ID}/${websiteId}/pages/${pageType}`)?.data || null;
+  const cacheKey = `${websiteId}:${COMPANY_ID}:${pageType}`;
+  const now = Date.now();
+
+  const cached = siteDataCache.get(cacheKey);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  if (siteDataPromises.has(cacheKey)) {
+    return siteDataPromises.get(cacheKey);
+  }
+
+  const promise = (async () => {
+    try {
+      const json = await adminFetch(
+        "/api/site-data",
+        { next: { revalidate: 300 } },
+        { type: pageType, pageType, websiteId, companyId: COMPANY_ID }
+      );
+      const unwrapped = unwrapSiteData(json);
+      siteDataCache.set(cacheKey, { data: unwrapped, timestamp: Date.now() });
+      return unwrapped;
+    } catch (error) {
+      console.error(`Admin MongoDB ${pageType} fetch failed:`, error);
+      if (cached) {
+        console.warn(`Serving stale cached ${pageType} data due to error`);
+        return cached.data;
+      }
+      return null;
+    } finally {
+      siteDataPromises.delete(cacheKey);
+    }
+  })();
+
+  siteDataPromises.set(cacheKey, promise);
+  return promise;
+}
+
+export async function fetchDocCached(pathValue) {
+  const parts = String(pathValue || "").split("/");
+  const pageIndex = parts.indexOf("pages");
+  if (pageIndex >= 0 && parts[pageIndex + 1]) {
+    return fetchSitePage(parts[pageIndex + 1]);
+  }
+  return null;
 }
 
 export async function fetchHomeData() {
@@ -221,15 +312,97 @@ export async function fetchServicesData() {
 
 export async function fetchDistrictData(district) {
   if (!district) return null;
-  return readDocument(`websites/${COMPANY_ID}/${WEBSITE_ID}/districts/${district}`)?.data || null;
+  const cacheKey = `${WEBSITE_ID}:${COMPANY_ID}:district:${district}`;
+  const now = Date.now();
+
+  const cached = siteDataCache.get(cacheKey);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  if (siteDataPromises.has(cacheKey)) {
+    return siteDataPromises.get(cacheKey);
+  }
+
+  const promise = (async () => {
+    try {
+      const json = await adminFetch(
+        "/api/site-data",
+        { next: { revalidate: 300 } },
+        {
+          type: "district",
+          pageType: "district",
+          district,
+          websiteId: WEBSITE_ID,
+          companyId: COMPANY_ID,
+        }
+      );
+      const unwrapped = unwrapSiteData(json);
+      siteDataCache.set(cacheKey, { data: unwrapped, timestamp: Date.now() });
+      return unwrapped;
+    } catch (error) {
+      console.error("Admin MongoDB district fetch failed:", error);
+      if (cached) return cached.data;
+      return null;
+    } finally {
+      siteDataPromises.delete(cacheKey);
+    }
+  })();
+
+  siteDataPromises.set(cacheKey, promise);
+  return promise;
 }
 
 export async function fetchDistricts({ companyId = COMPANY_ID, websiteId = WEBSITE_ID } = {}) {
-  try {
-    const rows = readDocumentsWhereCollection(`websites/${companyId}/${websiteId}/districts`);
-    return rows.map((r) => ({ id: r.doc_id, slug: r.doc_id, ...(r.data || {}) }));
-  } catch (error) {
-    console.error("Error fetching districts:", error);
-    return [];
+  const cacheKey = `${websiteId}:${companyId}:districts`;
+  const now = Date.now();
+
+  const cached = siteDataCache.get(cacheKey);
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
   }
+
+  if (siteDataPromises.has(cacheKey)) {
+    return siteDataPromises.get(cacheKey);
+  }
+
+  const promise = (async () => {
+    try {
+      const json = await adminFetch(
+        "/api/site-data",
+        { next: { revalidate: 300 } },
+        {
+          type: "districts",
+          pageType: "districts",
+          websiteId,
+          companyId,
+        }
+      );
+
+      const data = json?.data ?? json?.districts ?? json;
+      if (!Array.isArray(data)) return [];
+
+      const result = data.map((district, idx) => ({
+        id: district.id || district.slug || `dist-${idx}`,
+        ...district,
+        slug:
+          district.slug ||
+          district.id ||
+          makeSlug(district.district || district.name || `dist-${idx}`),
+      }));
+
+      siteDataCache.set(cacheKey, { data: result, timestamp: Date.now() });
+      return result;
+    } catch (error) {
+      console.error("Admin MongoDB districts fetch failed:", error);
+      if (cached) return cached.data;
+      return [];
+    } finally {
+      siteDataPromises.delete(cacheKey);
+    }
+  })();
+
+  siteDataPromises.set(cacheKey, promise);
+  return promise;
 }
+

@@ -1,12 +1,17 @@
-import { getSqliteDb } from "@/lib/sqliteDb";
+import { fetchFullCatalog } from "@/lib/data-fetcher-server";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
 
-function latestUpdatedAt() {
-  const db = getSqliteDb();
-  return db.prepare("SELECT COALESCE(MAX(updated_at), '') AS updated_at FROM documents").get()?.updated_at || "";
+function fingerprint(products) {
+  const list = Array.isArray(products) ? products : [];
+  return list
+    .map((p) => [
+      p.id || p.uid || p.productId || p.slug || "",
+      p.updatedAt || p.updated_at || p.updatedOn || "",
+      p.isPublished === false ? "0" : "1",
+    ].join("|"))
+    .sort()
+    .join("||");
 }
 
 export async function GET(request) {
@@ -15,31 +20,41 @@ export async function GET(request) {
   let closed = false;
 
   const stream = new ReadableStream({
-    start(controller) {
+    async start(controller) {
       const send = (event, data) => {
         if (closed) return;
-        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+        try {
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+          );
+        } catch {
+          closed = true;
+        }
       };
 
-      let last = "";
-      try {
-        last = latestUpdatedAt();
-        send("ready", { updatedAt: last });
-      } catch (error) {
-        send("error", { message: error.message });
-      }
+      let lastFingerprint = "";
 
-      timer = setInterval(() => {
+      const check = async () => {
+        if (closed) return;
+
         try {
-          const current = latestUpdatedAt();
-          if (current && current !== last) {
-            last = current;
-            send("catalog-changed", { updatedAt: current });
+          const products = await fetchFullCatalog();
+          const nextFingerprint = fingerprint(products);
+
+          if (!lastFingerprint) {
+            lastFingerprint = nextFingerprint;
+            send("ready", { updatedAt: new Date().toISOString(), count: products.length });
+          } else if (nextFingerprint !== lastFingerprint) {
+            lastFingerprint = nextFingerprint;
+            send("catalog-changed", { updatedAt: new Date().toISOString(), count: products.length });
           }
         } catch (error) {
-          send("error", { message: error.message });
+          send("error", { message: error.message || "Catalog sync failed" });
         }
-      }, 500);
+      };
+
+      await check();
+      timer = setInterval(check, 60000); // Check once per minute
 
       request.signal?.addEventListener("abort", () => {
         closed = true;
@@ -47,6 +62,7 @@ export async function GET(request) {
         try { controller.close(); } catch {}
       });
     },
+
     cancel() {
       closed = true;
       clearInterval(timer);
@@ -62,3 +78,4 @@ export async function GET(request) {
     },
   });
 }
+

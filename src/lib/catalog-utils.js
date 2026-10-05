@@ -1,12 +1,12 @@
 /**
  * Single source of truth for this website's catalog identity.
- * Change WEBSITE_ID only in this file when cloning this migration to another site.
+ * Keep WEBSITE_ID fixed for this website so MongoDB/Admin API mapping is stable.
  */
 export const WEBSITE_ID = "aozellocom";
-export const COMPANY_ID = process.env.NEXT_PUBLIC_COMPANY_ID || process.env.COMPANY_ID || "rajbiosis";
+export const COMPANY_ID = "rajbiosis";
 
 export function normalizeDomainId(value = "") {
-  return String(value)
+  return String(value || "")
     .trim()
     .toLowerCase()
     .replace(/^https?:\/\//, "")
@@ -16,16 +16,15 @@ export function normalizeDomainId(value = "") {
 }
 
 export function isExactWebsiteMatch(itemWebsiteId, targetWebsiteId = WEBSITE_ID) {
-  const a = normalizeDomainId(itemWebsiteId);
-  const b = normalizeDomainId(targetWebsiteId);
-  return a === b;
+  return normalizeDomainId(itemWebsiteId) === normalizeDomainId(targetWebsiteId);
 }
 
 export function isItemVisibleOnWebsite(item, targetWebsiteId = WEBSITE_ID) {
   if (!item || typeof item !== "object") return false;
-
   if (item.isPublished === false) return false;
-  if (["inactive", "draft"].includes(String(item.status || "").toLowerCase())) return false;
+
+  const status = String(item.status || "").trim().toLowerCase();
+  if (status === "inactive" || status === "draft") return false;
 
   if (Array.isArray(item.websiteIds)) {
     if (item.websiteIds.length === 0) return false;
@@ -40,10 +39,18 @@ export function isItemVisibleOnWebsite(item, targetWebsiteId = WEBSITE_ID) {
 export const isItemVisibleForWebsite = isItemVisibleOnWebsite;
 export const normalizeId = normalizeDomainId;
 
+export function visibilityWithParents(item, category, subcategory, targetWebsiteId = WEBSITE_ID) {
+  if (category && !isItemVisibleOnWebsite(category, targetWebsiteId)) return false;
+  if (subcategory && !isItemVisibleOnWebsite(subcategory, targetWebsiteId)) return false;
+  return isItemVisibleOnWebsite(item, targetWebsiteId);
+}
+
 export function makeSlug(text = "") {
   return String(text || "")
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }

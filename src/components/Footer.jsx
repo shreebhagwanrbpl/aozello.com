@@ -87,13 +87,37 @@ export default function Footer() {
     return `/${district}${path}`;
   };
 
-  const footerCategories = [
+  const [categories, setCategories] = useState([
+    "Test Strips",
     "Electrolyte Reagents",
     "Rapid Test Kits",
     "Hematology",
     "Biochemistry",
-    "Diagnostic Equipment",
-  ];
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/catalog")
+      .then((r) => r.json())
+      .then((json) => {
+        if (isMounted && Array.isArray(json?.categories) && json.categories.length > 0) {
+          const names = json.categories
+            .map((c) => c.name || c.category || c.id)
+            .filter(Boolean);
+          if (names.length > 0) {
+            setCategories(names);
+          }
+        }
+      })
+      .catch((e) => console.warn("Footer category fetch error:", e));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const footerCategories = categories.slice(0, 6);
+
 
   if (loading) {
     return (
